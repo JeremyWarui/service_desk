@@ -1,26 +1,26 @@
-// Import Sequelize
-import Sequelize from 'sequelize';
+import { Sequelize } from "sequelize";
 
-// Create a Sequelize instance
-const db = new Sequelize('postgres://localhost:5432/petOwners');
+class DBService {
+  constructor() {
+    this.db = new Sequelize('testDb', 'jeremy', 'postgres', {
+      host: 'localhost',
+      dialect: 'postgres'
+    });
 
-// Import all the models from the models folder
-const models = db.import('../models');
-
-// Set up the associations between the models
-Object.keys(models).forEach((modelName) => {
-  if (models[modelName].associate) {
-    models[modelName].associate(models);
+    this.connected = true;
   }
-});
 
-// Synchronize the models with the database
-try {
-  db.sync({ force: true }); // Use force: true only for development and testing
-  console.log('Database synchronized successfully');
-} catch (error) {
-  console.error('Database not synchronized successfully');
+  async isConnected() {
+    try {
+      await this.db.authenticate();
+      this.connected = true;
+      console.log('Connection has been established successfully.');
+    } catch (error) {
+      console.error('Unable to connect to the database:', error);
+      this.connected = false;
+    }
+  }
 }
 
-// Export the db object and the models
-export { db, models };
+const dbService = new DBService();
+export default dbService;

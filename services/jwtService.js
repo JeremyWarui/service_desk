@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 /* eslint-disable class-methods-use-this */
-import jwt from 'jsonwebtoken';
+/*import jwt from 'jsonwebtoken';
 
 class JWTService {
   async generateToken(userName, userRole) {
@@ -64,3 +64,4 @@ class JWTService {
 }
 
 export default JWTService;
+*/

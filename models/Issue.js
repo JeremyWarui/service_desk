@@ -1,12 +1,12 @@
-import db from "../utils/db";
-import { DataTypes } from "Sequelize";
-import Category from "../models/Category";
-import User from "../models/User";
+import dbService from '../services/dbService';
+import { DataTypes } from "sequelize";
+import Category from './Category';
 
-const Issue = db.define("Issue", {
+const Issue = dbService.db.define("Issue", {
   id: {
-    type: DataTypes.UUIDV4,
+    type: DataTypes.UUID,
     primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
   },
   category_id: {
     type: DataTypes.UUID,
@@ -50,8 +50,13 @@ const Issue = db.define("Issue", {
   },
 });
 
-Issue.belongsTo(User, { as: "creator", foreignKey: "user_id" });
-Issue.belongsTo(User, { as: "assignee", foreignKey: "assigned_to" });
-Issue.hasMany(Assignment, { foreignKey: "issue_id" });
+// Issue.belongsTo(User, { as: "creator", foreignKey: "user_id" });
+// Issue.belongsTo(User, { as: "assignee", foreignKey: "assigned_to" });
+// Issue.hasMany(Assignment, { foreignKey: "issue_id" });
+
+
+Issue.sync()
+  .then(() => console.log('Issue table created successfully'))
+  .catch(error => console.error('Failed to create Issue table:', error));
 
 export default Issue;

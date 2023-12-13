@@ -1,4 +1,4 @@
-import { models } from "../services/dbService";
+/* import { models } from "../services/dbService";
 import { v4 as uuidv4 } from "uuid";
 const { Issue, Category } = models;
 
@@ -93,3 +93,4 @@ class IssuesController {
 }
 
 export default IssuesController;
+*/

@@ -1,10 +1,12 @@
-import {DataTypes} from Sequelize;
-import db from '../utils/db';
+import { DataTypes } from "sequelize";
+import dbService from "../services/dbService";
+// import Issue from "./Issue";
 
-const Category = db.define('Category', {
+const Category = dbService.db.define('Category', {
     id: {
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
         primaryKey: true,
+        defaultValue: DataTypes.UUIDV4,
     },
     category_name: {
         type: DataTypes.STRING,
@@ -12,6 +14,10 @@ const Category = db.define('Category', {
     }
 });
 
-Category.hasMany(Issue, { foreignKey: 'category_id' });
+// Category.hasMany(Issue, { foreignKey: 'category_id' });
+
+Category.sync()
+  .then(() => console.log('Category table created successfully'))
+  .catch(error => console.error('Failed to create Category table:', error));
 
 export default Category;

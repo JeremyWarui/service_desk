@@ -7,9 +7,11 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({extended: true}));
 app.use('/', router);
 
-app.listen(5000);
+app.listen(5000, () => {
+    console.log('Server started successfully');
+});
 
 export default app;

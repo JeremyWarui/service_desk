@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import bcrypt from 'bcrypt';
+/*import bcrypt from 'bcrypt';
 import { models } from '../services/dbService';
 import redisClient from '../services/redisService';
 import JWTService from '../services/jwtService';
@@ -49,3 +49,4 @@ class Authorization {
 }
 
 export default Authorization;
+*/
