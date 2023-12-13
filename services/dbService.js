@@ -2,8 +2,7 @@ import { Sequelize } from "sequelize";
 
 class DBService {
   constructor() {
-    this.db = new Sequelize('testDb', 'jeremy', 'postgres', {
-      host: 'localhost',
+    this.db = new Sequelize(phttps://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@github.com/JeremyWarui/service_desk.git,
       dialect: 'postgres'
     });
 
