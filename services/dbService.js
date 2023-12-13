@@ -2,7 +2,8 @@ import { Sequelize } from "sequelize";
 
 class DBService {
   constructor() {
-    this.db = new Sequelize(phttps://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@github.com/JeremyWarui/service_desk.git,
+    this.db = new Sequelize(process.env.DATABASE, process.env.USERNAME, process.env.PASS, {
+      host: process.env.HOST,
       dialect: 'postgres'
     });
 
