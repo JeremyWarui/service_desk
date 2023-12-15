@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import User from "../models/User";
 import dbService from "../services/dbService";
+import Category from "../models/Category";
 
 class UsersController {
   static async createUser(req, res) {
@@ -19,13 +20,39 @@ class UsersController {
       if (!email) return res.status(400).json({ error: "Missing email" });
       if (!role) return res.status(400).json({ error: "Missing user role" });
 
-      // Create new user
-      const user = await User.create({
-        user_name: userName,
-        email: email,
-        user_role: role,
-      });
-      return res.status(201).json({ user });
+      // Handle technician category
+      if (role === "technician" && req.body.category) {
+        const { _id: categoryId } = await Category.findOne({
+          category_name: req.body.category,
+        });
+        if (!categoryId) {
+          return res.status(400).json({ error: "Invalid category provided" });
+        }
+
+        const technician = {
+          user_name: userName,
+          email: email,
+          user_role: role,
+          categoryId, // Extracted ID
+        };
+        await User.create(technician);
+      } else if (role === "technician" && !req.body.category) {
+        return res
+          .status(400)
+          .json({ error: "Missing category for technician user" });
+      }
+
+      // Create user for other roles
+      if (role !== "technician") {
+        const user = await User.create({
+          user_name: userName,
+          email: email,
+          user_role: role,
+        });
+        return res.status(201).json({ user });
+      }
+
+      return res.status(201).json({ User }); // Return created user object
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
