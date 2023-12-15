@@ -1,41 +1,52 @@
-import { DataTypes } from 'sequelize';
-import dbService from '../services/dbService';
-// import User from './User';
-// import Issue from './Issue';
+import mongoose from 'mongoose';
 
-const Assignment = dbService.db.define('Assignment', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
-  },
+const Schema = mongoose.Schema;
+
+const AssignmentSchema = new Schema({
   technician_id: {
-    type: DataTypes.UUID,
-    allowNull: false,
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
   },
   issue_id: {
-    type: DataTypes.UUID,
-    allowNull: false,
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'Issue',
   },
   status: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: String,
+    required: true,
+    enum: ['pending', 'assigned', 'in-progress', 'completed'],
   },
   priority: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+    type: Number,
+    required: true,
   },
   deadline: {
-    type: DataTypes.DATE,
-    allowNull: false,
+    type: Date,
   },
+  assigned_date: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+  messages: [{
+    sender: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    message: {
+      type: String,
+      required: true,
+    },
+    sent_date: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+  }],
 });
 
-// Assignment.belongsTo(User, { as: 'technician', foreignKey: 'technician_id' });
-// Assignment.belongsTo(Issue, { foreignKey: 'issue_id' });
-
-Assignment.sync()
-  .then(() => console.log('Assignment table created successfully'))
-  .catch(error => console.error('Failed to create Assignment table:', error));
+const Assignment = mongoose.model('Assignment', AssignmentSchema);
 
 export default Assignment;

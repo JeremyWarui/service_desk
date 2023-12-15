@@ -1,38 +1,28 @@
-import { DataTypes } from 'sequelize';
-import dbService from '../services/dbService';
-// import Issue from './Issue';
-// import Assignment from './Assignment';
+import mongoose from 'mongoose';
 
+const Schema = mongoose.Schema;
 
-const User = dbService.db.define('User', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
-  },
+const UserSchema = new Schema({
   user_name: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: String,
+    required: true,
+    unique: true,
   },
-  user_email: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  email: {
+    type: String,
+    required: true,
     unique: true,
   },
   user_role: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: String,
+    required: true,
+    enum: ['user', 'technician', 'maintenance_officer'],
+  },
+  department: {
+    type: String,
   },
 });
-// User.hasMany(Issue, { as: 'created_issues', foreignKey: 'user_id' });
-// User.hasMany(Issue, { as: 'assigned_issues', foreignKey: 'assigned_to' });
-// User.hasMany(Assignment, {
-//   as: 'technician_assignments',
-//   foreignKey: 'technician_id',
-// });
 
-User.sync()
-  .then(() => console.log('User table created successfully'))
-  .catch(error => console.error('Failed to create user table:', error));
+const User = mongoose.model('User', UserSchema);
 
 export default User;

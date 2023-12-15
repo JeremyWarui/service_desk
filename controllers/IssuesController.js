@@ -1,96 +1,247 @@
-/* import { models } from "../services/dbService";
 import { v4 as uuidv4 } from "uuid";
-const { Issue, Category } = models;
+import Issue from "../models/Issue";
+import User from "../models/User";
+import Category from "../models/Category";
+import dbService from "../services/dbService";
 
 class IssuesController {
   static async createNewIssue(req, res) {
-    const { issue, category } = req.body;
-    const userId = req.params;
-
-    if (!userId) return res.status(404).json({ error: "User not found" });
-
-    if (!issue || !category)
-      return res.status(400).json({ error: "Must add an issue and category" });
-
-    const foundCategory = await Category.find({ where: { name: category } });
-
-    if (!foundCategory)
-      return res.status(404).json({ error: "Category not found" });
-
-    const newIssue = await Issue.create({
-      id: uuidv4(),
-      category_id: foundCategory.id,
-      issue_message: issue,
-      issue_status: "open",
-      issue_date: new Date(),
-      user_id: userId,
-    });
-
-    return res.status(201).json({ issue: newIssue });
-  }
-
-  static async updateIssueAssignment(req, res) {
-    const { technicianId } = req.body;
-    const { issueId } = req.params;
-
     try {
-      const issue = await Issue.findByPk(issueId);
-      if (!issue) return res.status(404).json({ error: "Issue not found" });
+        // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
 
-      const technician = await User.findByPk(technicianId);
-      if (!technician)
-        return res.status(404).json({ error: "No technician found" });
+      const { category_id, issue_message, user_id, issue_status } = req.body;
 
-      await issue.update({
-        issue_assignment: "assigned",
-        assigned_to: technician.id,
+      const validationErrors = [];
+      if (!category_id) validationErrors.push("Missing category");
+      if (!issue_message) validationErrors.push("Missing issue message");
+      if (!user_id) validationErrors.push("Missing user");
+      if (
+        !issue_status ||
+        !["open", "in-progress", "resolved", "closed"].includes(issue_status)
+      )
+        validationErrors.push("Invalid issue status");
+
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ error: validationErrors.join(", ") });
+      }
+
+      const user = await User.findById(user_id);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      const category = await Category.findById(category_id);
+      if (!category)
+        return res.status(404).json({ error: "Category not found" });
+
+      const newIssue = new Issue({
+        category_id,
+        issue_message,
+        user_id,
+        issue_status,
+        open_date: Date.now(),
       });
 
-      return res.status(200).json({ issue });
+      await newIssue.save();
+
+      return res.status(201).json({
+        issue: {
+          ...newIssue.toObject(),
+          user: await User.findById(newIssue.user_id),
+          category: await Category.findById(newIssue.category_id),
+        },
+      });
     } catch (error) {
-      return res.status(500).json({ error: "Internal Server Error" });
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
     }
   }
 
-  static async updateIssueStatus(req, res) {
-    const { issueId } = req.params;
-
+  static async getAllIssues(req, res) {
     try {
-      const issue = await Issue.findByPk(issueId);
-      if (!issue) return res.status(404).json({ error: "Issue not found" });
+        // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
 
-      const assignee = await issue.getAssignee();
+    //   const { status, category, query } = req.query;
 
-      if (!assignee)
-        return res.status(404).json({ error: "Assignee not found" });
+    //   const filters = {};
+    //   if (status) filters.issue_status = status;
+    //   if (category) filters.category_id = category;
+    //   if (query) filters.issue_message = { $regex: query, $options: "i" };
 
-      if (assignee.user_role !== "technician")
-        return res.status(403).json({ error: "You are not a technician" });
+      const issues = await Issue.find({})
+        // .populate("user")
+        // .populate("category");
 
-      await issue.update({
-        issue_status: "resolved",
-        resolved_date: new Date(),
-      });
-
-      return res.status(200).json({ issue });
+      return res.status(200).json({ issues });
     } catch (error) {
-      return res.status(500).json({ error: "Internal Server Error" });
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
     }
   }
 
-  static async displayIssuesByUser(req, res) {
-    const { userId } = req.params;
+  static async getIssue(req, res) {
+    try {
+        // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
 
-    if (!userId) return res.status(404).json({ error: "User not found" });
-    const issues = await Issue.findAll({ where: { user_id: userId } });
-    return res.status(200).json({ issues });
+      const issueId = req.params.id;
+      const issue = await Issue.findById(issueId)
+        .populate("user", { user_password: 0 })
+        .populate("category");
+
+      if (!issue) return res.status(404).json({ error: "Issue not found" });
+
+      return res.status(200).json({ issue });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
   }
 
-  static async getAllissues(req, res) {
-    const issues = Issue.findAll();
-    return res.status(200).json({ issues });
+  static async updateIssue(req, res) {
+    try {
+      const issueId = req.params.id;
+      const issue = await Issue.findById(issueId);
+
+      if (!issue) return res.status(404).json({ error: "Issue not found" });
+
+      const validUpdates = [
+        "issue_message",
+        "issue_status",
+        "issue_resolution",
+      ];
+      const updateData = {};
+      for (const key in req.body) {
+        if (validUpdates.includes(key)) updateData[key] = req.body[key];
+      }
+
+      if (
+        updateData.issue_status &&
+        !["open", "in-progress", "resolved", "closed"].includes(
+          updateData.issue_status
+        )
+      ) {
+        return res.status(400).json({ error: "Invalid issue status" });
+      }
+
+      await issue.updateOne(updateData);
+
+      const updatedIssue = await Issue.findById(issueId)
+        .populate("user")
+        .populate("category");
+
+      return res.status(200).json({ issue: updatedIssue });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
+  }
+
+  static async deleteIssue(req, res) {
+    try {
+        // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
+
+      const issueId = req.params.id;
+      const issue = await Issue.findById(issueId);
+
+      if (!issue) return res.status(404).json({ error: "Issue not found" });
+
+      await issue.deleteOne();
+
+      return res.status(204).json({ message: "Issue deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
+  }
+
+  static async getIssuesByUser(req, res) {
+    try {
+        // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
+
+      const userId = req.params.id;
+      const issues = await Issue.find({ user_id: userId });
+      console.log(issues.length);
+
+      return res.status(200).json({ issues });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
+  }
+
+  static async getIssuesByCategory(req, res) {
+    try {
+        // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
+
+      const categoryId = req.params.id;
+      const issues = await Issue.find({ category_id: categoryId });
+
+      return res.status(200).json({ issues });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
+  }
+
+  static async searchIssues(req, res) {
+    try {
+        // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
+
+      const { keywords } = req.query;
+      const searchQuery = {
+        $or: [
+          { issue_message: { $regex: keywords, $options: "i" } },
+          {
+            category: {
+              $elemMatch: { name: { $regex: keywords, $options: "i" } },
+            },
+          },
+        ],
+      };
+
+      const issues = await Issue.find(searchQuery)
+        .populate("user")
+        .populate("category");
+
+      return res.status(200).json({ issues });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
   }
 }
 
 export default IssuesController;
-*/

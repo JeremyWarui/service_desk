@@ -1,62 +1,52 @@
-import dbService from '../services/dbService';
-import { DataTypes } from "sequelize";
-import Category from './Category';
+import mongoose from 'mongoose';
 
-const Issue = dbService.db.define("Issue", {
-  id: {
-    type: DataTypes.UUID,
-    primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
-  },
+const Schema = mongoose.Schema;
+
+const IssueSchema = new Schema({
   category_id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    allowNull: false,
-    references: {
-      model: Category,
-      key: "id",
-    },
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'Category',
   },
   issue_message: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: String,
+    required: true,
   },
   issue_status: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: "open",
+    type: String,
+    required: true,
+    enum: ['open', 'in-progress', 'resolved', 'closed'],
   },
   issue_resolution: {
-    type: DataTypes.STRING,
+    type: String,
   },
-  issue_assignment: {
-    type: DataTypes.STRING,
-    defaultValue: "pending",
-  },
-  issue_date: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-  assigned_to: {
-    type: DataTypes.UUID,
+  assignment_history: [{
+    assigned_to: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    assigned_date: {
+      type: Date,
+    },
+  }],
+  open_date: {
+    type: Date,
+    required: true,
+    default: Date.now,
   },
   resolved_date: {
-    type: DataTypes.DATE,
+    type: Date,
+  },
+  closed_date: {
+    type: Date,
   },
   user_id: {
-    type: DataTypes.UUID,
-    allowNull: false,
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
   },
-});
+})
 
-// Issue.belongsTo(User, { as: "creator", foreignKey: "user_id" });
-// Issue.belongsTo(User, { as: "assignee", foreignKey: "assigned_to" });
-// Issue.hasMany(Assignment, { foreignKey: "issue_id" });
-
-
-Issue.sync()
-  .then(() => console.log('Issue table created successfully'))
-  .catch(error => console.error('Failed to create Issue table:', error));
+const Issue = mongoose.model('Issue', IssueSchema);
 
 export default Issue;

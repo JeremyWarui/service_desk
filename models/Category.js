@@ -1,23 +1,16 @@
-import { DataTypes } from "sequelize";
-import dbService from "../services/dbService";
-// import Issue from "./Issue";
+import mongoose from 'mongoose';
 
-const Category = dbService.db.define('Category', {
-    id: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        defaultValue: DataTypes.UUIDV4,
-    },
+const Schema = mongoose.Schema;
+
+const CategorySchema = new Schema({
     category_name: {
-        type: DataTypes.STRING,
-        unique: true
-    }
-});
+      type: String,
+      required: true,
+      unique: true,
+    },
+  });
+  
+  const Category = mongoose.model('Category', CategorySchema);
 
-// Category.hasMany(Issue, { foreignKey: 'category_id' });
-
-Category.sync()
-  .then(() => console.log('Category table created successfully'))
-  .catch(error => console.error('Failed to create Category table:', error));
-
-export default Category;
+  export default Category;
+  
