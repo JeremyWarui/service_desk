@@ -36,6 +36,8 @@ router.post('/issues/:issueId/assignments', AssignmentsController.createAssignme
 router.patch('/issues/:issueId/assignments/:assignmentId', AssignmentsController.updateAssignment);
 router.get('/issues/:issueId/assignments', AssignmentsController.getIssueAssignments);
 router.get('/issues/:issueId/assignments/:assignmentId', AssignmentsController.getAssignmentDetails);
+router.get('/assignments', AssignmentsController.getAllAssignments);
+router.get('/assignments/:id', AssignmentsController.getAssignmentsByTechnicianId);
 
 
 export default router;

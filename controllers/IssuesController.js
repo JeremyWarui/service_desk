@@ -98,8 +98,8 @@ class IssuesController {
 
       const issueId = req.params.id;
       const issue = await Issue.findById(issueId)
-        .populate("user", { user_password: 0 })
-        .populate("category");
+        // .populate("user")
+        // .populate("category");
 
       if (!issue) return res.status(404).json({ error: "Issue not found" });
 

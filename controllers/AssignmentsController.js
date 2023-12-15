@@ -25,13 +25,14 @@ class AssignmentsController {
       const issue = await Issue.findById(issue_id);
       if (!issue) return res.status(404).json({ error: "Issue not found" });
 
-
       const newAssignmentHistory = {
         assigned_to: technician._id,
         assigned_date: Date.now(),
       };
 
       issue.assignment_history.push(newAssignmentHistory);
+
+      issue.issue_status = "in-progress";
 
       await issue.save();
 
@@ -52,6 +53,42 @@ class AssignmentsController {
     }
   }
 
+  static async getAllAssignments(req, res) {
+    try {
+      // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
+
+      const assignments = await Assignment.find({});
+      return res.status(200).json({ assignments });
+    } catch (error) {
+      return res.status(404).json({ error: "Assignments not found" });
+    }
+  }
+
+  static async getAssignmentsByTechnicianId(req, res) {
+    try {
+      // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
+
+      const techniciansTasksAssigned = await Assignment.find({
+        technician_id: req.params.id,
+      });
+      if (techniciansTasksAssigned)
+        return res.status(200).json({ techniciansTasksAssigned });
+      return res.status(404).json({ error: "No tasks found for technician" });
+    } catch (error) {
+      return res.status(404).json({ error: "Assignments not found" });
+    }
+  }
+
   static async updateAssignment(req, res) {
     try {
       // Check database connection before proceeding
@@ -67,14 +104,28 @@ class AssignmentsController {
       if (!assignment)
         return res.status(404).json({ error: "Assignment not found" });
 
-      if (status) assignment.status = status;
+      if (status) {
+        assignment.status = status;
+        const issue = await Issue.findById(assignment.issue_id);
+        // Update issue status based on assignment status mapping
+        if (status === "completed") {
+          issue.status = "resolved";
+          issue.resolved_date = new Date();
+        }
+        // update the issue
+        issue.issue_status = status;
+        console.log(issue);
+
+        await issue.save();
+      }
       if (priority) assignment.priority = priority;
       if (deadline) assignment.deadline = deadline;
       if (messages) assignment.messages.push(...messages);
 
-      await assignment.updateOne({});
+      await assignment.save();
 
       const updatedAssignment = await Assignment.findById(assignmentId);
+      console.log(updatedAssignment);
 
       return res.status(200).json({ assignment: updatedAssignment });
     } catch (error) {
