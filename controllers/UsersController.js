@@ -29,13 +29,13 @@ class UsersController {
           return res.status(400).json({ error: "Invalid category provided" });
         }
 
-        const technician = {
+        const technician = await User.create({
           user_name: userName,
           email: email,
           user_role: role,
-          categoryId, // Extracted ID
-        };
-        await User.create(technician);
+          category: categoryId, // Extracted ID
+        });
+        return res.status(201).json({ technician });
       } else if (role === "technician" && !req.body.category) {
         return res
           .status(400)

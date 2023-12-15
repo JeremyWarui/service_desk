@@ -18,6 +18,10 @@ const UserSchema = new Schema({
     required: true,
     enum: ['user', 'technician', 'maintenance_officer'],
   },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: 'Category',
+  },
   department: {
     type: String,
   },
