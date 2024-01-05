@@ -69,16 +69,9 @@ class IssuesController {
           .json({ error: "Database connection unavailable." });
       }
 
-    //   const { status, category, query } = req.query;
-
-    //   const filters = {};
-    //   if (status) filters.issue_status = status;
-    //   if (category) filters.category_id = category;
-    //   if (query) filters.issue_message = { $regex: query, $options: "i" };
-
       const issues = await Issue.find({})
-        // .populate("user")
-        // .populate("category");
+        .populate("user")
+        .populate("category");
 
       return res.status(200).json({ issues });
     } catch (error) {
@@ -98,8 +91,8 @@ class IssuesController {
 
       const issueId = req.params.id;
       const issue = await Issue.findById(issueId)
-        // .populate("user")
-        // .populate("category");
+        .populate("user")
+        .populate("category");
 
       if (!issue) return res.status(404).json({ error: "Issue not found" });
 
