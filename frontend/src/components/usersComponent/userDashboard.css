@@ -1,0 +1,74 @@
+/* .sidenav {
+  position: fixed; 
+  width: 250px; 
+  height: 100%; 
+  overflow-y: auto; 
+  background-color: #232323;
+  transition: 0.5s ease; 
+} */
+
+/* style the navbar-toggler button */
+/* .navbar-toggler {
+  position: absolute; 
+  top: 10px; 
+  right: 10px; 
+  border: none; 
+  background-color: transparent; 
+  color: white; 
+  font-size: 25px; 
+  cursor: pointer; 
+} */
+
+/* style the sidenav-links div */
+/* .sidenav-links {
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  margin-top: 50px; 
+} */
+
+/* style the sidenav-link elements */
+/* .sidenav-link {
+  display: flex; 
+
+  align-items: center; 
+  width: 80%; 
+  padding: 10px; 
+  color: white; 
+  text-decoration: none; 
+} */
+
+/* style the sidenav-icon elements */
+/* .sidenav-icon {
+  margin-right: 10px; 
+} */
+
+/* style the sidenav-text elements */
+/* .sidenav-text {
+  display: none; 
+} */
+
+/* style the active sidenav-link element */
+/* .sidenav-link.active {
+  background-color: #4caf50; 
+} */
+
+/* style the main-content element */
+/* .main-content {
+  margin-left: 250px; 
+} */
+
+/* use media queries to make the layout responsive for different screen sizes */
+/* @media (max-width: 768px) {
+  .sidenav {
+    width: 0;
+  }
+
+  .sidenav-text {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+} */
