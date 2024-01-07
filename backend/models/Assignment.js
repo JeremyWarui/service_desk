@@ -3,15 +3,20 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const AssignmentSchema = new Schema({
-  technician_id: {
-    type: Schema.Types.ObjectId,
+  technician: {
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
   },
-  issue_id: {
-    type: Schema.Types.ObjectId,
+  issue: {
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Issue',
+  },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'Category',
   },
   status: {
     type: String,
@@ -32,7 +37,7 @@ const AssignmentSchema = new Schema({
   },
   messages: [{
     sender: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
     message: {

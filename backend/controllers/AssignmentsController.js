@@ -2,6 +2,7 @@ import Issue from "../models/Issue";
 import User from "../models/User";
 import dbService from "../services/dbService";
 import Assignment from "../models/Assignment";
+import Category from "../models/Category";
 
 class AssignmentsController {
   static async createAssignment(req, res) {
@@ -14,7 +15,10 @@ class AssignmentsController {
       }
       const { technician_id, issue_id, status, priority, deadline } = req.body;
 
-      if (!technician_id || !issue_id || !status || !priority) {
+      // Change the category_id field to category
+      const { category } = req.body;
+
+      if (!technician_id || !issue_id || !status || !priority || !category) {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
@@ -31,6 +35,12 @@ class AssignmentsController {
       };
 
       issue.assignment_history.push(newAssignmentHistory);
+
+      // Change the technician field to assignedPerson
+      issue.assignedPerson = {
+        technician: technician._id,
+        assigned_date: Date.now(),
+      };
 
       issue.issue_status = "in-progress";
 
@@ -62,13 +72,41 @@ class AssignmentsController {
           .json({ error: "Database connection unavailable." });
       }
 
-      const assignments = await Assignment.find({});
+      const assignments = await Assignment.find({})
+        .populate("technician", "user_name")
+        .populate("issue", "issue_message issue_status")
+        .populate("category", "category_name")
+        .exec();
       return res.status(200).json({ assignments });
     } catch (error) {
       return res.status(404).json({ error: "Assignments not found" });
     }
   }
 
+  static async getAssignmentDetails(req, res) {
+    try {
+      // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
+      const { assignmentId } = req.params;
+      const assignment = await Assignment.findById(assignmentId)
+        .populate("technician", "user_name")
+        .populate("issue", "issue_message issue_status")
+        .populate("category", "category_name")
+        .exec();
+
+      if (!assignment)
+        return res.status(404).json({ error: "Assignment not found" });
+
+      return res.status(200).json({ assignment });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
+  }
   static async getAssignmentsByTechnicianId(req, res) {
     try {
       // Check database connection before proceeding
@@ -152,29 +190,29 @@ class AssignmentsController {
     }
   }
 
-  static async getAssignmentDetails(req, res) {
-    try {
-      // Check database connection before proceeding
-      if (!(await dbService.isConnected())) {
-        return res
-          .status(500)
-          .json({ error: "Database connection unavailable." });
-      }
-      const { issueId, assignmentId } = req.params;
-      const assignment = await Assignment.findOne({
-        issue_id: issueId,
-        _id: assignmentId,
-      });
+  // static async getAssignmentDetails(req, res) {
+  //   try {
+  //     // Check database connection before proceeding
+  //     if (!(await dbService.isConnected())) {
+  //       return res
+  //         .status(500)
+  //         .json({ error: "Database connection unavailable." });
+  //     }
+  //     const { issueId, assignmentId } = req.params;
+  //     const assignment = await Assignment.findOne({
+  //       issue_id: issueId,
+  //       _id: assignmentId,
+  //     });
 
-      if (!assignment)
-        return res.status(404).json({ error: "Assignment not found" });
+  //     if (!assignment)
+  //       return res.status(404).json({ error: "Assignment not found" });
 
-      return res.status(200).json({ assignment });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: "Something went wrong" });
-    }
-  }
+  //     return res.status(200).json({ assignment });
+  //   } catch (error) {
+  //     console.error(error);
+  //     return res.status(500).json({ error: "Something went wrong" });
+  //   }
+  // }
 }
 
 export default AssignmentsController;

@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 
 const IssueSchema = new Schema(
   {
-    category_id: {
-      type: Schema.Types.ObjectId,
+    category: {
+      type: mongoose.Schema.Types.ObjectId, // Use mongoose.Schema.Types.ObjectId instead of mongoose.ObjectId
       required: true,
       ref: "Category",
     },
@@ -24,37 +24,34 @@ const IssueSchema = new Schema(
     assignment_history: [
       {
         assigned_to: {
-          type: Schema.Types.ObjectId,
+          type: mongoose.Schema.Types.ObjectId, // Use mongoose.Schema.Types.ObjectId instead of mongoose.ObjectId
+          required: true, // Add required: true
           ref: "User",
         },
         assigned_date: {
           type: Date,
+          required: true, // Add required: true
         },
       },
     ],
-    open_date: {
-      type: Date,
-      required: true,
-      default: Date.now,
-    },
-    resolved_date: {
-      type: Date,
-    },
-    closed_date: {
-      type: Date,
-    },
     user_id: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId, // Use mongoose.Schema.Types.ObjectId instead of mongoose.ObjectId
       required: true,
       ref: "User",
     },
+    // Use a virtual field for the user reference
     user: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId, // Use mongoose.Schema.Types.ObjectId instead of mongoose.ObjectId
       ref: "User",
+      localField: "user_id",
+      foreignField: "_id",
     },
   },
   {
     strictPopulate: false, // Set the strictPopulate option to false
+    toJSON: { virtuals: true }, // Include virtual fields in JSON output
+    toObject: { virtuals: true }, // Include virtual fields in Object output
+    timestamps: true, // Add timestamps: true
   }
 );
 

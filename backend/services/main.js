@@ -8,4 +8,6 @@ import dbService from "./dbService";
     console.log("Connection to MongoDB established successfully.");
   }
   console.log('Unsuccessful');
+
+  
 })();

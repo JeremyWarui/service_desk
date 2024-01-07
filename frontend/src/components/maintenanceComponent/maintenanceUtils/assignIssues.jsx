@@ -1,115 +1,226 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Table, Button, Form } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Alert,
+  Card,
+  Spinner,
+  FormControl,
+  FormGroup,
+  Table,
+  Badge,
+} from "react-bootstrap";
+import moment from "moment";
 
 const AssignIssues = () => {
-  const [issues, setIssues] = useState([]);
+  const [issue, setIssue] = useState(null);
+  const [selected, setSelected] = useState({
+    technician: "",
+    status: "",
+  });
   const [technicians, setTechnicians] = useState([]);
-  const [assignedTechnicians, setAssignedTechnicians] = useState({});
-  const [error, setError] = useState(null);
-  const { id } = useParams(); // Use the useParams hook to get the id parameter
-  const navigate = useNavigate(); // Use the useNavigate hook
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Wrap the fetchData function in a useCallback hook
-  const fetchData = useCallback(async () => {
-    try {
-      // Fix the template literal syntax
-      const issuesResponse = await axios.get(`http://localhost:5000/issues/${id}`);
-      const issuesData = issuesResponse.data;
-      console.log(issuesData);
-      const techniciansResponse = await axios.get("/api/technicians");
-      const techniciansData = techniciansResponse.data;
-      setIssues(issuesData);
-      setTechnicians(techniciansData);
-      setAssignedTechnicians(
-        issuesData.reduce(
-          (acc, issue) => ({ ...acc, [issue._id]: issue.technician || null }),
-          {}
-        )
-      ); // Pre-fill with existing assignments
-      //populate the user aand category
-      // eslint-disable-next-line no-undef
-      const issues = await Issues.find({}).populate('user').populate('category');
-      // eslint-disable-next-line no-undef
-      return res.status(200).json({issues}); 
+  const navigate = useNavigate();
+  const match = useParams();
+  const location = useLocation();
 
-    } catch (error) {
-      // Handle the error here
-      console.error(error);
-      setError(error);
-    }
-  }, [id]); // Add any dependencies of fetchData here
-
+  // Fetch the issue data from the location state
   useEffect(() => {
-    // Fetch issues and technicians from your data source
-    fetchData();
-  }, [id, fetchData]); // Add id and fetchData as dependencies
+    const issue = location.state.issue;
+    console.log(issue);
+    setIssue(issue);
+  }, [location.state.issue]);
 
-  const handleTechnicianChange = (event) => {
-    const issueId = event.target.name;
-    const technicianId = event.target.value;
-    setAssignedTechnicians({ ...assignedTechnicians, [issueId]: technicianId });
+  // Fetch the technicians data from the server
+  useEffect(() => {
+    const fetchTechnicians = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/users");
+        const data = response.data;
+        const technicians = data.users.filter(
+          (user) => user.user_role === "technician"
+        );
+        setTechnicians(technicians);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchTechnicians();
+  }, []);
+
+  // Set the initial values of the selected state variable
+  useEffect(() => {
+    if (issue) {
+      setSelected({
+        technician: issue.assignedPerson,
+        status: issue.status,
+      });
+    }
+  }, [issue]);
+
+  // Handle the change of the technician and status select inputs
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSelected((prevSelected) => ({
+      ...prevSelected,
+      [name]: value,
+    }));
   };
 
+  // Handle the submission of the form
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    confirmAssignments();
+  };
+
+  // Confirm the assignments and update the issue data
   const confirmAssignments = async () => {
-    // Send updated assignments to your API
     try {
-      await axios.put("/api/issues/assign-technicians", assignedTechnicians);
-      // Handle successful response (e.g., display a success message)
-      console.log("Assignments updated successfully");
-      // You might want to display a success message to the user here
-      setAssignedTechnicians({}); // Clear the assignments
-      fetchData(); // Refresh the issues to reflect the changes
-      navigate("/issues"); // Navigate back to the issues page
+      setLoading(true);
+      // Check if the issue is not assigned to anyone yet
+      if (!issue.assignedPerson.technician) {
+        // Assign the issue to the selected technician and add to the assignment history
+        await axios.patch(
+          `http://localhost:5000/issues/${match.params.issue_id}`,
+          {
+            assignedPerson: {
+              // Use assignedPerson instead of technician
+              technician: selected.technician,
+              assigned_date: Date.now(),
+            },
+            status: selected.status,
+          }
+        );
+      } else {
+        // Update the issue data as before
+        await axios.patch(
+          `http://localhost:5000/issues/${match.params.issue_id}`,
+          {
+            assignedPerson: {
+              // Use assignedPerson instead of technician
+              technician: selected.technician,
+              assigned_date: Date.now(),
+            },
+            status: selected.status,
+          }
+        );
+      }
+      setLoading(false);
+      setSuccess("Issue updated successfully!"); // Set success message
+      // Redirect to dashboard after 3 seconds
+      setTimeout(() => {
+        navigate("/maintenance/dashboard/display-issues");
+      }, 3000);
     } catch (error) {
-      // Handle error (e.g., display an error message)
-      console.error("Error updating assignments:", error);
-      // You might want to display an error message to the user here
+      console.error("Error updating issue:", error);
+      setLoading(false);
+      setError("Something went wrong. Please try again."); // Set error message
     }
   };
 
   return (
-    <div>
-      <h2>Assign Issues</h2>
-      {error && <p className="error">Something went wrong: {error.message}</p>}
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Date Reported</th>
-            <th>User</th>
-            <th>Assign Technician</th>
-          </tr>
-        </thead>
-        <tbody>
-          {issues.map((issue) => (
-            <tr key={issue._id}>
-              <td>{issue.category.name}</td> {/* Display the category name */}
-              <td>{issue.open_date}</td>
-              <td>{issue.user.name}</td> {/* Display the user name */}
-              <td>
-                <Form.Select
-                  name={issue._id}
-                  value={assignedTechnicians[issue._id]}
-                  onChange={handleTechnicianChange}
+    <Container>
+      <h1 className="pt-4">Assign Issue</h1>
+      {loading && (
+        <Spinner animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner>
+      )}
+      {success && <Alert variant="success">{success}</Alert>}
+      {error && <Alert variant="danger">{error}</Alert>}
+      {issue && (
+        <Form onSubmit={handleSubmit}>
+          <Row>
+            <Col>
+              <Card bg="light" border="primary" text="dark">
+                <Card.Header>Issue ID: {issue._id}</Card.Header>
+                <Table striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>Message</th>
+                      <th>Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Category</td>
+                      <td>{issue.category}</td>
+                    </tr>
+                    <tr>
+                      <td>Message</td>
+                      <td>{issue.issue_message}</td>
+                    </tr>
+                    <tr>
+                      <td>Open Date</td>
+                      <td>{moment(issue.open_date).format("DD/MM/YYYY")}</td>
+                    </tr>
+                    <tr>
+                      <td>Assigned To</td>
+                      <td>{issue.technician}</td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Card>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <FormGroup controlId="technician">
+                <p>Assign Technician</p>
+                <FormControl
+                  as="select"
+                  name="technician"
+                  value={selected.technician}
+                  onChange={handleChange}
+                  required
                 >
-                  <option value="">Select Technician</option>
-                  {technicians.map((technician) => (
-                    <option key={technician._id} value={technician._id}>
-                      {technician.name}
+                  <option value="">Select a technician</option>
+                  {technicians.map((tech) => (
+                    <option key={tech._id} value={tech._id}>
+                      {tech.user_name}
                     </option>
                   ))}
-                </Form.Select>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <Button variant="primary" onClick={confirmAssignments}>
-        Confirm Assignments
-      </Button>
-    </div>
+                </FormControl>
+              </FormGroup>
+            </Col>
+            <Col>
+              <FormGroup controlId="status">
+              <p>Status</p>
+                <FormControl
+                  as="select"
+                  name="status"
+                  value={selected.status}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select a status</option>
+                  <option value="open">Open</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                </FormControl>
+              </FormGroup>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <Button type="submit" variant="primary">
+                Confirm
+              </Button>
+            </Col>
+          </Row>
+        </Form>
+      )}
+    </Container>
   );
 };
 

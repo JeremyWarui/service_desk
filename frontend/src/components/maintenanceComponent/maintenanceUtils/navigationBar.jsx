@@ -39,6 +39,9 @@ const MaintenanceNavigationMenu = ({ onTabChange }) => {
               <FaExclamationCircle className="me-2" /> Issues{" "}
               {/* Use the FaExclamationCircle icon*/}
             </NavLink>
+            <NavLink to="assignments" className="nav-link">
+              <FaUser className="me-2" /> Assignments
+            </NavLink>
             <NavLink
               to="manage-categories"
               className="nav-link"
@@ -46,9 +49,6 @@ const MaintenanceNavigationMenu = ({ onTabChange }) => {
             >
               <FaFilter className="me-2" /> Manage Categories
             </NavLink>
-            {/* <NavLink to="assign-issues" className="nav-link">
-              <FaUser className="me-2" /> Assign Issues
-            </NavLink> */}
             <NavLink to="reports" className="nav-link">
               <FaChartBar className="me-2" /> Reports
             </NavLink>

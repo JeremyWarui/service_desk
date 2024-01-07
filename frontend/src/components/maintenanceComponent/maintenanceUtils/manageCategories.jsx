@@ -44,7 +44,8 @@ const ManageCategories = () => {
 
   return (
     <div>
-      <h2>Manage Categories</h2>
+      <h1 className="py-3">Manage Categories</h1>
+      <hr></hr>
       {error && <p className="error">Something went wrong: {error.message}</p>}
       {/* Use conditional rendering to check if categories state exists*/ }
       {categories ? (
@@ -61,7 +62,7 @@ const ManageCategories = () => {
               <tr key={category._id}>
                 <td>{category.category_name}</td>
                 <td>
-                  <Button variant="primary" size="sm">
+                  <Button className="me-2" variant="primary" size="sm">
                     Edit
                   </Button>
                   <Button variant="danger" size="sm">
@@ -77,7 +78,7 @@ const ManageCategories = () => {
         <p>Loading categories...</p>
       )}
       <Form onSubmit={createCategory}>
-        <Form.Group>
+        <Form.Group className="mt-4">
           <Form.Label>New Category Name</Form.Label>
           <Form.Control
             type="text"
@@ -85,7 +86,7 @@ const ManageCategories = () => {
             onChange={(e) => setNewCategoryName(e.target.value)}
           />
         </Form.Group>
-        <Button variant="primary" type="submit">
+        <Button className="mt-4" variant="primary" type="submit">
           Create Category
         </Button>
       </Form>

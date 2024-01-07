@@ -13,7 +13,7 @@ router.get('/', AppController.getHomepage);
 // Users
 router.post('/user', UsersController.createUser);
 router.get('/users', UsersController.getUsers);
-router.get('/user/:id', UsersController.getUser);
+router.get('/users/:id', UsersController.getUser);
 router.patch('/user/me', UsersController.updateUser);
 
 // Categories
@@ -35,8 +35,9 @@ router.get('/issues/search', IssuesController.searchIssues);
 router.post('/issues/:issueId/assignments', AssignmentsController.createAssignment);
 router.patch('/issues/:issueId/assignments/:assignmentId', AssignmentsController.updateAssignment);
 router.get('/issues/:issueId/assignments', AssignmentsController.getIssueAssignments);
-router.get('/issues/:issueId/assignments/:assignmentId', AssignmentsController.getAssignmentDetails);
 router.get('/assignments', AssignmentsController.getAllAssignments);
+router.get('/assignments/:assignmentId', AssignmentsController.getAssignmentDetails);
+// router.post('/assignments', AssignmentsController.updateAllAssignments);
 router.get('/assignments/:id', AssignmentsController.getAssignmentsByTechnicianId);
 
 

@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import Issue from "../models/Issue";
 import User from "../models/User";
 import Category from "../models/Category";
@@ -7,7 +6,7 @@ import dbService from "../services/dbService";
 class IssuesController {
   static async createNewIssue(req, res) {
     try {
-        // Check database connection before proceeding
+      // Check database connection before proceeding
       if (!(await dbService.isConnected())) {
         return res
           .status(500)
@@ -62,16 +61,14 @@ class IssuesController {
 
   static async getAllIssues(req, res) {
     try {
-        // Check database connection before proceeding
+      // Check database connection before proceeding
       if (!(await dbService.isConnected())) {
         return res
           .status(500)
           .json({ error: "Database connection unavailable." });
       }
 
-      const issues = await Issue.find({})
-        .populate("user")
-        .populate("category");
+      const issues = await Issue.find({}).populate("user").populate("category");
 
       return res.status(200).json({ issues });
     } catch (error) {
@@ -82,26 +79,53 @@ class IssuesController {
 
   static async getIssue(req, res) {
     try {
-        // Check database connection before proceeding
+      // Check database connection
       if (!(await dbService.isConnected())) {
         return res
           .status(500)
           .json({ error: "Database connection unavailable." });
       }
-
+  
       const issueId = req.params.id;
+      // Find the issue and populate necessary fields
       const issue = await Issue.findById(issueId)
-        .populate("user")
-        .populate("category");
-
-      if (!issue) return res.status(404).json({ error: "Issue not found" });
-
-      return res.status(200).json({ issue });
+        .populate([
+          { path: "user", select: "user_name email user_role" },
+          { path: "category", select: "category_name" }, // Use category instead of category_id
+          { path: "assignment_history.assigned_to", select: "user_name" },
+        ])
+        .exec();
+  
+      // Validate and access data
+      if (!issue) {
+        return res.status(404).json({ error: "Issue not found" });
+      }
+  
+      const categoryName = issue.category?.category_name; // Use category instead of category_id
+      if (!categoryName) {
+        return res.status(400).json({ error: "Category name not found" });
+      }
+      // Get technicians with matching category
+      const technicians = await User.find({
+        user_role: "technician",
+        category: issue.category, // Use category instead of category_id
+      })
+        .select("user_name email user_role") // Select only necessary fields
+        .exec()
+      // Handle unassigned issues
+      let assignedPerson = "";
+      if (issue.assignment_history && issue.assignment_history.length > 0) {
+        assignedPerson = issue.assignment_history[0].assigned_to.user_name;
+      }
+  
+      // Return the issue object, the assigned person, the category name, and the list of technicians in the response
+      return res.status(200).json({ issue, assignedPerson, categoryName, technicians });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
     }
   }
+  
 
   static async updateIssue(req, res) {
     try {
@@ -144,7 +168,7 @@ class IssuesController {
 
   static async deleteIssue(req, res) {
     try {
-        // Check database connection before proceeding
+      // Check database connection before proceeding
       if (!(await dbService.isConnected())) {
         return res
           .status(500)
@@ -167,7 +191,7 @@ class IssuesController {
 
   static async getIssuesByUser(req, res) {
     try {
-        // Check database connection before proceeding
+      // Check database connection before proceeding
       if (!(await dbService.isConnected())) {
         return res
           .status(500)
@@ -187,7 +211,7 @@ class IssuesController {
 
   static async getIssuesByCategory(req, res) {
     try {
-        // Check database connection before proceeding
+      // Check database connection before proceeding
       if (!(await dbService.isConnected())) {
         return res
           .status(500)
@@ -206,7 +230,7 @@ class IssuesController {
 
   static async searchIssues(req, res) {
     try {
-        // Check database connection before proceeding
+      // Check database connection before proceeding
       if (!(await dbService.isConnected())) {
         return res
           .status(500)
