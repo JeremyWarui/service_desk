@@ -3,6 +3,7 @@ import { Table, Button } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import moment from 'moment';
+import "./tablesStyles.css";
 
 const DisplayIssues = () => {
   const [issues, setIssues] = useState([]);
@@ -37,8 +38,8 @@ const DisplayIssues = () => {
           technician:
             issuesWithDetails[index][1]?.data?.user_name ?? "Not yet assigned",
         }));
-        // const unassigned = updatedIssues.filter((issue) => issue.technician === "Not yet assigned");
-        setIssues(updatedIssues);
+        const unassigned = updatedIssues.filter((issue) => issue.technician === "Not yet assigned");
+        setIssues(unassigned);
       } catch (error) {
         console.error(error);
       } finally {
@@ -57,14 +58,14 @@ const DisplayIssues = () => {
         {isLoading ? (
           <p>Loading issues...</p>
         ) : (
-          <Table striped bordered hover>
+          <Table striped bordered hover responsive="md" className="table table-sm">
             <thead>
               <tr>
                 <th>Issue ID</th>
                 <th>Category</th>
                 <th>Message</th>
                 <th>Status</th>
-                <th>Open Date</th>
+                <th>Reported On</th>
                 <th>Assigned To</th>
                 <th>Actions</th>
               </tr>
@@ -76,7 +77,7 @@ const DisplayIssues = () => {
                   <td>{issue.category}</td>
                   <td>{issue.issue_message}</td>
                   <td>{issue.issue_status}</td>
-                  <td>{moment(issue.open_date).format("DD/MM/YYYY")}</td>
+                  <td>{moment(issue.createdAt).format("DD/MM/YYYY")}</td>
                   <td>{issue.technician}</td>
                   <td>
                     <Button

@@ -33,12 +33,13 @@ router.get('/issues/search', IssuesController.searchIssues);
 
 // // Assignments
 router.post('/issues/:issueId/assignments', AssignmentsController.createAssignment);
-router.patch('/issues/:issueId/assignments/:assignmentId', AssignmentsController.updateAssignment);
 router.get('/issues/:issueId/assignments', AssignmentsController.getIssueAssignments);
 router.get('/assignments', AssignmentsController.getAllAssignments);
 router.get('/assignments/:assignmentId', AssignmentsController.getAssignmentDetails);
 // router.post('/assignments', AssignmentsController.updateAllAssignments);
-router.get('/assignments/:id', AssignmentsController.getAssignmentsByTechnicianId);
+router.get('/techAssignments/:technicianId', AssignmentsController.getAssignmentsByTechnicianId);
+router.patch('/assignments/:assignmentId', AssignmentsController.updateAssignment);
+
 
 
 export default router;

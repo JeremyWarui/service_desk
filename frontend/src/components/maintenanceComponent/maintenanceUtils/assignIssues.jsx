@@ -88,12 +88,10 @@ const AssignIssues = () => {
       setLoading(true);
       // Check if the issue is not assigned to anyone yet
       if (!issue.assignedPerson.technician) {
-        // Assign the issue to the selected technician and add to the assignment history
         await axios.patch(
           `http://localhost:5000/issues/${match.params.issue_id}`,
           {
             assignedPerson: {
-              // Use assignedPerson instead of technician
               technician: selected.technician,
               assigned_date: Date.now(),
             },
@@ -106,7 +104,6 @@ const AssignIssues = () => {
           `http://localhost:5000/issues/${match.params.issue_id}`,
           {
             assignedPerson: {
-              // Use assignedPerson instead of technician
               technician: selected.technician,
               assigned_date: Date.now(),
             },

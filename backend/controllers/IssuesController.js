@@ -68,7 +68,13 @@ class IssuesController {
           .json({ error: "Database connection unavailable." });
       }
 
-      const issues = await Issue.find({}).populate("user").populate("category");
+      const issues = await Issue.find({})
+        .populate([
+          { path: "user", select: "user_name" },
+          { path: "category", select: "category_name" },
+        ])
+        .lean()
+        .exec();
 
       return res.status(200).json({ issues });
     } catch (error) {
@@ -85,47 +91,55 @@ class IssuesController {
           .status(500)
           .json({ error: "Database connection unavailable." });
       }
-  
+
       const issueId = req.params.id;
-      // Find the issue and populate necessary fields
-      const issue = await Issue.findById(issueId)
-        .populate([
-          { path: "user", select: "user_name email user_role" },
-          { path: "category", select: "category_name" }, // Use category instead of category_id
-          { path: "assignment_history.assigned_to", select: "user_name" },
-        ])
-        .exec();
-  
-      // Validate and access data
-      if (!issue) {
-        return res.status(404).json({ error: "Issue not found" });
-      }
-  
-      const categoryName = issue.category?.category_name; // Use category instead of category_id
-      if (!categoryName) {
-        return res.status(400).json({ error: "Category name not found" });
-      }
-      // Get technicians with matching category
-      const technicians = await User.find({
-        user_role: "technician",
-        category: issue.category, // Use category instead of category_id
+      const result = await Issue.findById(issueId, {
+        _id: 1,
+        issue_message: 1,
+        assignment_history: 1,
       })
-        .select("user_name email user_role") // Select only necessary fields
-        .exec()
-      // Handle unassigned issues
+        .populate([
+          { path: "user", select: "user_name" },
+          { path: "category", select: "category_name" },
+          {
+            path: "assignment_history.assigned_to",
+            select: "user_name assigned_date",
+          },
+        ])
+        .lean()
+        .orFail(new Error("Issue not found"));
+
+      // Get the category name, raisee name, and assigned person name from the populated documents
       let assignedPerson = "";
-      if (issue.assignment_history && issue.assignment_history.length > 0) {
-        assignedPerson = issue.assignment_history[0].assigned_to.user_name;
+      if (result.assignment_history && result.assignment_history.length > 0) {
+        assignedPerson = result.assignment_history[0].assigned_to.user_name;
       }
-  
-      // Return the issue object, the assigned person, the category name, and the list of technicians in the response
-      return res.status(200).json({ issue, assignedPerson, categoryName, technicians });
+      // Get the technicians who have the same category as the issue
+      const technicians = await User.find(
+        {
+          user_role: "technician",
+          category: result.category,
+        },
+        { user_name: 1, user_role: 1 }
+      ).lean();
+
+      const issue = {
+        id: result._id,
+        issue: result,
+        category: result.category.category_name,
+        status: result.status,
+        raiseeName: result.user.user_name,
+        assignedTechnician: assignedPerson,
+        assigned_date: result.assignment_history[0].assigned_date,
+        techniciansList: technicians,
+      };
+
+      return res.status(200).json({ issue });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
     }
   }
-  
 
   static async updateIssue(req, res) {
     try {

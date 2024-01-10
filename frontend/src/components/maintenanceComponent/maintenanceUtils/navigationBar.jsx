@@ -1,21 +1,12 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import {
-  FaBars,
-  FaTimes,
-  FaFilter,
-  FaUser,
-  FaChartBar,
-  FaExclamationCircle,
-} from "react-icons/fa"; // Import the FaExclamationCircle icon
+import {FaBars, FaTimes, FaFilter, FaUser, FaChartBar, FaExclamationCircle} from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const MaintenanceNavigationMenu = ({ onTabChange }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
     <>
@@ -25,12 +16,6 @@ const MaintenanceNavigationMenu = ({ onTabChange }) => {
         id="offcanvasExample"
         style={{ width: "235px", position: "fixed", top: "0" }}
       >
-        <button
-          type="button"
-          className="btn-close text-reset"
-          data-bs-dismiss="offcanvas"
-          aria-label="Close"
-        ></button>
         <div className="offcanvas-body">
           <nav className="nav flex-column mb-auto">
             <NavLink to="issues" className="nav-link">

@@ -4,9 +4,8 @@ import axios from "axios";
 import { Table, Form, Button, Alert, Row, Col, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import "./tablesStyles.css";
 
-function AssignmentDetails({ match, history, location }) {
+function TechAssignmentDetails({ match, history, location }) {
   const { id } = useParams();
   const [assignment, setAssignment] = useState(null);
   const [updatedAssignment, setUpdatedAssignment] = useState(null);
@@ -19,7 +18,6 @@ function AssignmentDetails({ match, history, location }) {
       const assignment = response.data.assignment;
       setAssignment(assignment);
       setUpdatedAssignment(assignment);
-      console.log(assignment);
     } catch (error) {
       console.error(error);
     }
@@ -44,10 +42,13 @@ function AssignmentDetails({ match, history, location }) {
       const response = await axios
         .put(`http://localhost:5000/assignments/${id}`, updatedAssignment)
         .then(() => {
+                // Display a success message
+          alert("Assignment updated successfully");
           navigate(-1); // Navigate to the previous page
         });
       setMessage(response.data.assignment);
     } catch (error) {
+      alert("Error updating assignment. Please try again.");
       setMessage(error.response.data.error);
     }
   };
@@ -67,11 +68,9 @@ function AssignmentDetails({ match, history, location }) {
             <thead>
               <tr>
                 <th>Issue ID</th>
-                <th>Category</th>
                 <th>Issue</th>
                 <th>Reported by</th>
                 <th>Reported On</th>
-                <th>Technician</th>
                 <th>Assigned On</th>
                 <th>Status</th>
                 <th>Priority</th>
@@ -81,11 +80,9 @@ function AssignmentDetails({ match, history, location }) {
             <tbody>
               <tr>
                 <td>{assignment.id}</td>
-                <td>{assignment.category}</td>
                 <td>{assignment.issue}</td>
                 <td>{assignment.raiseeName}</td>
                 <td>{moment(assignment.reportedDate).format("DD/MM/YYYY")}</td>
-                <td>{assignment.technician}</td>
                 <td>{moment(assignment.assigned_date).format("DD/MM/YYYY")}</td>
                 <td>{assignment.status}</td>
                 <td>
@@ -114,7 +111,7 @@ function AssignmentDetails({ match, history, location }) {
           ))}
           <hr />
           <Form onSubmit={handleSubmit}>
-            <Row>
+          <Row>
               <Col md={4}>
                 <Form.Group controlId="status">
                   <Form.Label>Status</Form.Label>
@@ -125,7 +122,6 @@ function AssignmentDetails({ match, history, location }) {
                     onChange={handleChange}
                   >
                     <option value="pending">Pending</option>
-                    <option value="assigned">Assigned</option>
                     <option value="in-progress">In Progress</option>
                     <option value="completed">Completed</option>
                   </Form.Control>
@@ -148,13 +144,14 @@ function AssignmentDetails({ match, history, location }) {
               </Col>
               <Col md={4}>
                 <Form.Group controlId="deadline">
-                  <Form.Label>Deadline</Form.Label>
+                  <Form.Label>Resolved Date</Form.Label>
                   <Form.Control
                     type="date"
                     name="deadline"
-                    value={updatedAssignment.deadline}
+                    value={updatedAssignment.resolved_date}
                     onChange={handleChange}
                   />
+                  {console.log(updatedAssignment.resolved_date)}
                 </Form.Group>
               </Col>
             </Row>
@@ -187,4 +184,4 @@ function AssignmentDetails({ match, history, location }) {
   );
 }
 
-export default AssignmentDetails;
+export default TechAssignmentDetails;

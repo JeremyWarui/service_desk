@@ -8,6 +8,11 @@ const AssignmentSchema = new Schema({
     required: true,
     ref: 'User',
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
   issue: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
