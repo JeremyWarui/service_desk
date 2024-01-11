@@ -2,55 +2,49 @@ import Issue from "../models/Issue";
 import User from "../models/User";
 import Category from "../models/Category";
 import dbService from "../services/dbService";
+import mongoose from "mongoose";
 
 class IssuesController {
   static async createNewIssue(req, res) {
     try {
       // Check database connection before proceeding
       if (!(await dbService.isConnected())) {
-        return res
-          .status(500)
-          .json({ error: "Database connection unavailable." });
+        return res.status(500).json({ error: "Database connection unavailable." });
       }
-
-      const { category_id, issue_message, user_id, issue_status } = req.body;
+      const { category, issue_message, user, issue_status = "open" } = req.body;
 
       const validationErrors = [];
-      if (!category_id) validationErrors.push("Missing category");
+      if (!category) validationErrors.push("Missing category");
       if (!issue_message) validationErrors.push("Missing issue message");
-      if (!user_id) validationErrors.push("Missing user");
-      if (
-        !issue_status ||
-        !["open", "in-progress", "resolved", "closed"].includes(issue_status)
-      )
+      if (!user) validationErrors.push("Missing user");
+      if (!issue_status || !["open", "in-progress", "resolved", "closed"].includes(issue_status)) {
         validationErrors.push("Invalid issue status");
-
+      }
       if (validationErrors.length > 0) {
         return res.status(400).json({ error: validationErrors.join(", ") });
       }
 
-      const user = await User.findById(user_id);
-      if (!user) return res.status(404).json({ error: "User not found" });
+      const foundUser = await User.findById(user);
+      if (!foundUser) return res.status(404).json({ error: "User not found" });
 
-      const category = await Category.findById(category_id);
-      if (!category)
+      const foundCategory = await Category.findById(category);
+      if (!foundCategory)
         return res.status(404).json({ error: "Category not found" });
-
+  
       const newIssue = new Issue({
-        category_id,
+        category,
         issue_message,
-        user_id,
+        user,
         issue_status,
-        open_date: Date.now(),
       });
-
+  
       await newIssue.save();
 
       return res.status(201).json({
         issue: {
           ...newIssue.toObject(),
-          user: await User.findById(newIssue.user_id),
-          category: await Category.findById(newIssue.category_id),
+          user: await User.findById(newIssue.user),
+          category: await Category.findById(newIssue.category),
         },
       });
     } catch (error) {
@@ -58,6 +52,7 @@ class IssuesController {
       return res.status(500).json({ error: "Something went wrong" });
     }
   }
+  
 
   static async getAllIssues(req, res) {
     try {
@@ -96,7 +91,10 @@ class IssuesController {
       const result = await Issue.findById(issueId, {
         _id: 1,
         issue_message: 1,
+        issue_status: 1,
         assignment_history: 1,
+        createdAt: 1,
+        updatedAt: 1
       })
         .populate([
           { path: "user", select: "user_name" },
@@ -127,10 +125,11 @@ class IssuesController {
         id: result._id,
         issue: result,
         category: result.category.category_name,
-        status: result.status,
+        status: result.issue_status,
         raiseeName: result.user.user_name,
         assignedTechnician: assignedPerson,
-        assigned_date: result.assignment_history[0].assigned_date,
+        assignedDate: result.assignment_history[0].assigned_date,
+        updateDate: result.updatedAt,
         techniciansList: technicians,
       };
 
@@ -147,7 +146,7 @@ class IssuesController {
       const issue = await Issue.findById(issueId);
 
       if (!issue) return res.status(404).json({ error: "Issue not found" });
-
+      
       const validUpdates = [
         "issue_message",
         "issue_status",
@@ -167,13 +166,17 @@ class IssuesController {
         return res.status(400).json({ error: "Invalid issue status" });
       }
 
+      if (!updateData.issue_message) {
+        return res.status(400).json({ error: "Issue message is required" });
+      }
+
       await issue.updateOne(updateData);
 
       const updatedIssue = await Issue.findById(issueId)
         .populate("user")
         .populate("category");
 
-      return res.status(200).json({ issue: updatedIssue });
+      return res.status(200).json({ issue: updatedIssue, updatedDate: moment(updatedIssue.updatedAt).format("DD/MM/YYYY") });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
@@ -211,11 +214,17 @@ class IssuesController {
           .status(500)
           .json({ error: "Database connection unavailable." });
       }
-
       const userId = req.params.id;
-      const issues = await Issue.find({ user_id: userId });
-      console.log(issues.length);
-
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      const issues = await Issue.find({ user: userId })
+       .populate([
+        {path: "category"},
+        {path: "user", select: "user_name"}
+       ])
+       .lean()
+       .exec();
       return res.status(200).json({ issues });
     } catch (error) {
       console.error(error);
@@ -231,10 +240,8 @@ class IssuesController {
           .status(500)
           .json({ error: "Database connection unavailable." });
       }
-
       const categoryId = req.params.id;
-      const issues = await Issue.find({ category_id: categoryId });
-
+      const issues = await Issue.find({ category: categoryId });
       return res.status(200).json({ issues });
     } catch (error) {
       console.error(error);

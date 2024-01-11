@@ -4,7 +4,7 @@ import { FaBars, FaTimes, FaHome, FaFilter } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const NavigationMenu = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -31,27 +31,27 @@ const NavigationMenu = () => {
     <>
       <div
         className={`offcanvas offcanvas-start ${sidebarOpen ? "show" : ""}`}
-        tabindex="-1"
+        tabIndex="-1"
         id="offcanvasExample"
-        style={{ width: "320px" }}
+        style={{ width: "220px" }}
       >
-        <button
-          type="button"
-          className="btn-close text-reset"
-          data-bs-dismiss="offcanvas"
-          aria-label="Close"
-        ></button>
         <div className="offcanvas-body">
+          <div className="d-flex">
+            <h2 className="mb-4">Welcome</h2>
+          </div>
           <nav className="nav flex-column mb-auto">
             <NavLink
-              to="post-issue"
+              to="all-issues"
               className="nav-link"
               aria-current="page" // Active link logic handled by React Router
             >
-              <FaHome className="me-2" /> Report New Issue
+              <FaHome className="me-2" /> All Issues
+            </NavLink>
+            <NavLink to="report-issue" className="nav-link">
+              <FaFilter className="me-2" /> Post New Issue
             </NavLink>
             <NavLink to="my-issues" className="nav-link">
-              <FaFilter className="me-2" /> Open Issues
+              <FaFilter className="me-2" /> My Issues
             </NavLink>
             {/* Add additional tabs as needed */}
           </nav>

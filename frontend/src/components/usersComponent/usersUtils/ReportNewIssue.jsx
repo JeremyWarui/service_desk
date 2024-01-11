@@ -1,113 +1,84 @@
 import React, { useState, useEffect } from "react";
-import { Form, FormGroup, FormControl, Button, Alert } from "react-bootstrap";
+import { Spinner, Card, Form, Button } from "react-bootstrap";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext }from "../userContext/AuthContext"; // Assuming your auth context path
 
 const ReportIssueForm = () => {
   const [categories, setCategories] = useState([]);
-  const [title, setTitle] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [description, setDescription] = useState("");
-  const [submitError, setSubmitError] = useState(null);
+  const [issueMessage, setIssueMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const { userId } = useContext(AuthContext); // Get user ID from context
 
   useEffect(() => {
-    // Fetch categories from the backend API
-    axios
-      .get("/categories")
-      .then((response) => {
-        setCategories(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-        // Handle category fetching errors
-      });
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/categories");
+        setCategories(response.data.categories);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // Fetch current user ID (replace with your actual logic)
-    axios
-      .get("/current-user") // Assuming this endpoint provides the user ID
-      .then((response) => {
-        // setCurrentUserId(response.data.id); // Assuming ID is in the response
-      })
-      .catch((error) => {
-        console.error(error);
-        // Handle user ID fetching errors
-      });
+    fetchCategories();
   }, []);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    // Validate form data before submitting
-    if (!title || !selectedCategory || !description) {
-      setSubmitError("Please fill in all required fields.");
-      return;
-    }
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const response = await axios.post("/issues", {
-        category_id: selectedCategory._id, // Use the ID from the selected category object
-        issue_message: description,
-        // user_id: currentUserId, // Use the fetched user ID
-        issue_status: "open",
+      await axios.post("http://localhost:5000/issues", {
+        user: userId, // Include user ID in the request
+        category: selectedCategory._id,
+        issue_message: issueMessage,
       });
-
-      console.log(response.data);
-      setTitle("");
-      setSelectedCategory(null);
-      setDescription("");
-      setSubmitError(null);
-      // Display a success message or redirect as needed
+      navigate("/my-issues"); // Redirect to myIssues after successful submission
     } catch (error) {
+      // Handle submission error
       console.error(error);
-      setSubmitError("Failed to submit issue. Please try again.");
+      setError("Failed to submit issue. Please try again.");
     }
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      {submitError && <Alert variant="danger">{submitError}</Alert>}
-      <FormGroup className="m-4">
-        <Form.Label>Issue Title</Form.Label>
-        <FormControl
-          type="text"
-          placeholder="Enter a concise issue summary"
-          required
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-        />
-      </FormGroup>
-      <FormGroup className="m-4">
-        <Form.Label>Category</Form.Label>
-        <FormControl
-          as={"select"}
-          defaultValue=""
-          required
-          value={selectedCategory}
-          onChange={(event) => setSelectedCategory(event.target.value)}
-        >
-          <option value="">Select Category</option>
-          {categories.map((category) => (
-            <option key={category._id} value={category}>
-              {category.name}
-            </option>
-          ))}
-        </FormControl>
-      </FormGroup>
-      <FormGroup className="m-4">
-        <Form.Label>Description</Form.Label>
-        <FormControl
-          as={"textarea"}
-          rows={5}
-          placeholder="Provide a clear and detailed description of the issue"
-          required
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-        />
-      </FormGroup>
-
-      <Button variant="primary" type="submit" className="ml-5">
-        Report Issue
-      </Button>
-    </Form>
+    <>
+    <h1 className="my-3">Post New Issue</h1>
+    <hr />
+    <Card>
+      <Card.Header>New Issue</Card.Header>
+      <Card.Body>
+        {isLoading && <Spinner animation="border" />}
+        {error && <div>{error.message}</div>}
+        {!isLoading && !error && (
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-4" controlId="issueCategory">
+              <Form.Label>Category</Form.Label>
+              <Form.Select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category}>
+                    {category.category_name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-4" controlId="issueMessage">
+              <Form.Label>Issue Message</Form.Label>
+              <Form.Control as="textarea" rows={5} value={issueMessage} onChange={(e) => setIssueMessage(e.target.value)} />
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Submit Issue
+            </Button>
+          </Form>
+        )}
+      </Card.Body>
+    </Card>
+    </>
   );
 };
 

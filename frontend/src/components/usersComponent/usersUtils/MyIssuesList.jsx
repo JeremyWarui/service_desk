@@ -1,85 +1,97 @@
-import React, { useState, useEffect } from "react";
-import { Table, Button, Badge } from "react-bootstrap";
+import React, { useState, useEffect, useContext } from "react";
+import { Table, Button, Form, Select } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { AuthContext }from "../userContext/AuthContext"; // Assuming your auth context path
+
 import axios from "axios";
+import moment from "moment";
 
-const MyIssues = ({ userId, categoryId }) => {
-  // Accept user/category IDs as props
+const MyIssues = () => {
   const [issues, setIssues] = useState([]);
-  const [sortBy, setSortBy] = useState(null);
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const navigate = useNavigate();
 
+  // Retrieve user ID from context
+  const { user } = useContext(AuthContext);
   useEffect(() => {
-    const fetchIssues = async () => {
-      try {
-        let response;
-        if (userId) {
-          response = await axios.get(`/users/${userId}/issues`); // Fetch by user
-        } else if (categoryId) {
-          response = await axios.get(`/categories/${categoryId}/issues`); // Fetch by category
-        } else {
-          response = await axios.get("/issues"); // Fetch all issues
-        }
-        setIssues(response.data.issues);
-      } catch (error) {
-        console.error("Error fetching issues:", error);
-      }
-    };
+    // Fetch available categories
+    axios.get("http://localhost:5000/categories")
+      .then((response) => setAvailableCategories(response.data.categories))
+      .catch((error) => console.error(error));
 
-    fetchIssues();
-  }, [userId, categoryId]); // Refetch if user/category IDs change
-  const handleSort = (column) => {
-    setSortBy(column);
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    fetchIssues(); // Fetch issues initially
+  }, []);
+
+  const fetchIssues = async () => {
+    const categoryId = selectedCategory;
+
+    try {
+      const response = await axios.get(`http://localhost:5000/users/${user._id}/issues`);
+      const filteredIssues = categoryId
+        ? response.data.issues.filter((issue) => issue.category._id === categoryId)
+        : response.data.issues;
+      setIssues(filteredIssues);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const sortedIssues = issues.slice().sort((a, b) => {
-    if (!sortBy) return 0;
-    if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1;
-    if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1;
-    return 0;
-  });
+  useEffect(() => {
+    fetchIssues(); // Refetch issues when category changes
+  }, [selectedCategory]);
 
   return (
-    <Table striped bordered hover responsive>
-      <thead>
-        <tr>
-          <th>
-            <Button variant="link" onClick={() => handleSort("title")}>
-              Title {sortBy === "title" && <Badge>{sortOrder}</Badge>}
-            </Button>
-          </th>
-          <th>
-            <Button variant="link" onClick={() => handleSort("category")}>
-              Category {sortBy === "category" && <Badge>{sortOrder}</Badge>}
-            </Button>
-          </th>
-          <th>Status</th>
-          <th>Date Reported</th>
-          <th>Assigned Technician</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sortedIssues.map((issue) => (
-          <tr key={issue.id}>
-            <td>{issue.title}</td>
-            <td>{issue.category}</td>
-            <td>
-              <span
-                className={`text-${
-                  issue.status.toLowerCase() === "open" ? "danger" : "success"
-                }`}
-              >
-                {issue.status}
-              </span>
-            </td>
-            <td>{issue.dateReported}</td>
-            <td>
-              {issue.assignedTechnician ? issue.assignedTechnician.name : "-"}
-            </td>
+    <div>
+      <h1 className="my-3">My Issues</h1>
+      <hr />
+      <Form>
+        <Form.Group controlId="categoryFilter">
+          <Form.Label>Filter by Category:</Form.Label>
+          <Form.Select
+            className="mb-4"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {availableCategories.map((category) => (
+              <option key={category._id} value={category._id}>
+                {category.category_name}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+      </Form>
+      <Table striped bordered hover responsive>
+        <thead>
+          <tr>
+            <th>Issue</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Date Reported</th>
+            <th>Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {issues.map((issue) => (
+            <tr key={issue._id}>
+              <td>{issue.issue_message}</td>
+              <td>{issue.category.category_name}</td>
+              <td>{issue.issue_status}</td>
+              <td>{moment(issue.createdAt).format("DD/MM/YYYY")}</td>
+              <td>
+              <Button variant="primary" onClick={() => {
+                console.log(issue.issue_message);
+                navigate(`/users/dashboard/issue-details/${issue._id}`)}
+              }>
+                View Details
+              </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
   );
 };
 

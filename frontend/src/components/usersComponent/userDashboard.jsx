@@ -1,120 +1,52 @@
-import React, { useState, useEffect } from "react";
-import NavigationMenu from "./usersUtils/UserNavigation";
-import MyIssuesList from "./usersUtils/MyIssuesList";
-import ReportIssueForm from "./usersUtils/ReportNewIssue";
-import { Routes, Route } from "react-router-dom";
-import axios from 'axios';
-import {
-  Row,
-  Col,
-  Spinner,
-  Card,
-  CardBody,
-  CardTitle,
-  Button,
-} from "react-bootstrap";
+import React, { useState, useContext } from "react";
+import { Container, Row, Col } from "react-bootstrap";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthContext } from "./usersUtils/userContext/AuthContext"; // Import AuthContext
+
+// Import necessary components
+import ReportIssueForm from "./usersUtils/IssuesServices/ReportNewIssue";
+import MyIssues from "./usersUtils/IssuesServices/MyIssuesList";
+import AllIssues from "./usersUtils/IssuesServices/AllIssues";
+import IssueDetails from "./usersUtils/IssuesServices/IssueDetails";
+import UserNavigationMenu from "./usersUtils/IssuesServices/UserNavigation";
 
 const UserDashboard = () => {
-  // ... state variables and data fetching logic ...
-  const [issues, setIssues] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null); // Track errors
-
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const response = await axios.get("/issues");
-        setIssues(response.data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInitialData();
-  }, []);
-
-  const fetchIssues = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await axios.get("/issues");
-      setIssues(response.data);
-    } catch (error) {
-      setError(error);
-    } finally {
-      setIsLoading(false);
-    }
+  const { user } = useContext(AuthContext);
+  const [activeTab, setActiveTab] = useState("all-issues");
+    const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    window.scrollTo(0, 0);
   };
 
   return (
-    <div className="user-dashboard container-fluid">
-      <Row className="p-4">
-        <Col md={3} className="sidebar">
-          <NavigationMenu />
-        </Col>
-        <Col md={9} className="main-content">
-          <Routes>
-            <Route path="/" element={<>
-              <h1 className="mb-4">My Dashboard</h1>
-              {isLoading && <Spinner animation="border" />}
-              {!isLoading && issues.length > 0 && (
-                <Card className="mb-4">
-                  <CardBody>
-                    <CardTitle>My Issues</CardTitle>
-                    <MyIssuesList issues={issues} onUpdate={fetchIssues} />
-                  </CardBody>
-                </Card>
-              )}
-              {!isLoading && issues.length === 0 && (
-                <p>No issues found.</p>
-              )}
-            </>} />
-            <Route path="post-issue" element={<>
-              <Card className="mb-4">
-                <CardBody>
-                  <CardTitle>Report New Issue</CardTitle>
-                  <ReportIssueForm onSuccess={fetchIssues} />
-                </CardBody>
-              </Card>
-            </>
-            }/>
-          </Routes>
-        </Col>
-      </Row>
-    </div>
+    <>
+      {user && user.user_role === "user" ? (
+        <>
+          <Container fluid>
+            <Row>
+              {/* Navigation menu */}
+              <Col sm={2} className="bg-light" style={{ height: "100%" }}>
+                <UserNavigationMenu onTabChange={handleTabChange} />
+              </Col>
+              {/* Main content area */}
+              <Col sm={10}>
+                <Routes>
+                  {/* Redirect to "all-issues" for default route */}
+                  <Route path="*" element={ <Col sm={7}> <Navigate to="all-issues" replace /></Col>} />
+                  <Route path="report-issue" element={<ReportIssueForm />} />
+                  <Route path="my-issues" element={<MyIssues />} />
+                  <Route path="all-issues" element={<AllIssues />} />
+                  <Route path="issue-details/:id" element={<IssueDetails />} />
+                </Routes>
+              </Col>
+            </Row>
+          </Container>
+        </>
+      ) : (
+        <div>Unauthorized access</div>
+      )}
+    </>
   );
 };
 
 export default UserDashboard;
-
-
-
-
-// import React from "react";
-// import NavigationMenu from "./usersUtils/UserNavigation";
-// import MyIssues from "./usersUtils/MyIssuesTab";
-// import ReportIssueForm from "./usersUtils/ReportNewIssue";
-// import { Routes, Route } from "react-router-dom";
-// import { Row, Col } from "react-bootstrap";
-
-// const UserDashboard = () => (
-//   <div className="user-dashboard pt-5">
-//     <Row>
-//       <Col md={3} className="sidebar">
-//         <NavigationMenu />
-//       </Col>
-//       <Col md={9} className="main-content">
-//         <Routes>
-//           <Route path="issues" element={<MyIssues />} />
-//           <Route path="post-issue" element={<ReportIssueForm />} />
-//           <Route path="my-issues" element={<MyIssues />} />
-//         </Routes>
-//       </Col>
-//     </Row>
-//   </div>
-// );
-
-// export default UserDashboard;
