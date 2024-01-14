@@ -47,6 +47,7 @@ IssuesController.deleteIssue);
 router.get("/users/:id/issues", IssuesController.getIssuesByUser);
 router.get("/categories/:id/issues", IssuesController.getIssuesByCategory);
 router.get("/issues/search", IssuesController.searchIssues);
+router.get("/open-issues/", IssuesController.getAllUnassignedIssues);
 
 // // Assignments
 router.post('/issues/:issueId/assignments',

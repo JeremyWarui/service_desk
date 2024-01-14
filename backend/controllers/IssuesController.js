@@ -3,6 +3,7 @@ import User from "../models/User";
 import Category from "../models/Category";
 import dbService from "../services/dbService";
 import mongoose from "mongoose";
+import moment from "moment";
 
 class IssuesController {
   static async createNewIssue(req, res) {
@@ -44,6 +45,7 @@ class IssuesController {
       });
 
       await newIssue.save();
+      console.log(newIssue);
 
       return res.status(201).json({
         issue: {
@@ -89,10 +91,47 @@ class IssuesController {
 
       // Calculate the total pages
       const pages = Math.ceil(total / pageSize);
+      console.log("issues", issues);
+      console.log(("total:", total));
       return res.status(200).json({ issues, page, pages, total });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
+    }
+  }
+
+  static async getAllUnassignedIssues(req, res) {
+    try {
+      // Check database connection
+      if (!(await dbService.isConnected())) {
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
+      }
+      
+      // Set the pagination options
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 20;
+      const skip = (page - 1) * pageSize;
+      const limit = pageSize;
+
+      // Find the issues by status
+      const issues = await Issue.find({ issue_status: "open" })
+        .skip(skip)
+        .limit(limit)
+        .populate([{ path: "category", select: "category_name" }])
+        .lean()
+        .exec();
+
+      // Get the total count and pages
+      const total = await Issue.countDocuments({ issue_status: "open" });
+      const pages = Math.ceil(total / pageSize);
+
+      // Send the response
+      return res.status(200).json({ issues, page, pages, total });
+    } catch (error) {
+      // Handle the error
+      return res.status(500).json({ error: error.message });
     }
   }
 
@@ -152,7 +191,7 @@ class IssuesController {
         techniciansList: technicians,
       };
 
-      // console.log(issue);
+      console.log(issue);
       return res.status(200).json({ issue });
     } catch (error) {
       console.error(error);
@@ -196,12 +235,12 @@ class IssuesController {
         .populate("user")
         .populate("category");
 
-      return res
-        .status(200)
-        .json({
-          issue: updatedIssue,
-          updatedDate: moment(updatedIssue.updatedAt).format("DD/MM/YYYY"),
-        });
+      console.log(updatedIssue);
+
+      return res.status(200).json({
+        issue: updatedIssue,
+        updatedDate: moment(updatedIssue.updatedAt).format("DD/MM/YYYY"),
+      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });

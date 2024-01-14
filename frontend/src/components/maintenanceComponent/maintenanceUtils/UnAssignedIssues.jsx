@@ -1,70 +1,80 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Table,
-  Button,
-  Form,
-  FormControl,
-  Select,
-} from "react-bootstrap";
+import { Table, Button, Form, FormControl, Select } from "react-bootstrap";
+import ReactPaginate from 'react-paginate';
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+
 import "./tablesStyles.css"; // Assuming your custom styles are here
 
 const UnassignedIssues = () => {
   const [issues, setIssues] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const fetchCategories = async () => {
     try {
-      const response = axios.get("http://localhost:5000/categories");
-      response
-        .then((response) => {
-          const categories = response.data.categories;
-          setCategories(categories);
-        })
-        .catch((error) => console.error(error));
+      const response = await axios.get("http://localhost:5000/categories");
+      const categories = response.data.categories;
+      setCategories(categories);
     } catch (error) {
       console.error(error);
     }
   };
 
+  const fetchIssues = async (page) => {
+    setIsLoading(true);
+
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/open-issues`
+      );
+      const { issues: unassignedIssues, page: currentPage, pages, total } = response.data;
+
+      // Fetch category data concurrently
+      const promises = unassignedIssues.map((issue) =>
+        axios.get(`http://localhost:5000/categories/${issue.category._id}`)
+      );
+      const categories = await Promise.all(promises);
+
+      const updatedIssues = unassignedIssues.map((issue, index) => ({
+        ...issue,
+        category: categories[index]?.data?.category?.category_name ?? null,
+        technician: "Not yet assigned", // No need for technician data here
+      }));
+
+      const filteredIssues = updatedIssues.filter(
+        (issue) => !selectedCategory || issue.category === selectedCategory
+      );
+
+      setCurrentPage(page);
+      setPages(pages);
+      setTotal(total);
+      setIssues(filteredIssues);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchIssues = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get("http://localhost:5000/issues");
-        const data = response.data;
-        // Fetch category data concurrently
-        const promises = data.issues.map((issue) =>
-          axios.get(`http://localhost:5000/categories/${issue.category._id}`)
-        );
-        const categories = await Promise.all(promises);
-        const unassignedIssues = data.issues.filter((issue) =>
-          !issue.assignment_history || !issue.assignment_history[0]
-        );
-        const updatedIssues = unassignedIssues.map((issue, index) => ({
-          ...issue,
-          category: categories[index]?.data?.category?.category_name ?? null,
-          technician: unassignedIssues[index][1]?.data?.user_name ?? "Not yet assigned",
-        }));
-        const filteredIssues = updatedIssues.filter((issue) =>  !selectedCategory || issue.category === selectedCategory);
-        setIssues(filteredIssues);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchIssues();
-    fetchCategories()
-  }, [selectedCategory]);
+    fetchIssues(currentPage);
+    fetchCategories();
+  }, [ currentPage,selectedCategory]);
 
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
+    fetchIssues(1); // Fetch first page on category change
+  };
+
+  const handlePageChange = (newPage) => {
+    fetchIssues(newPage);
   };
 
   return (
@@ -76,27 +86,34 @@ const UnassignedIssues = () => {
           <Form.Group controlId="filterCategory">
             <Form.Label>Filter by Category:</Form.Label>
             <Form.Control
-                as="select"
-                value={selectedCategory}
-                onChange={handleCategoryChange}
-              >
-                <option value="">Select Category</option>
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category.category_name}>
-                    {category.category_name}
-                  </option>
-                ))}
-              </Form.Control>
+              as="select"
+              value={selectedCategory || ''}
+              onChange={handleCategoryChange}
+            >
+              <option value="">Select Category</option>
+              <option value="">All Categories</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category.category_name}>
+                  {category.category_name}
+                </option>
+              ))}
+            </Form.Control>
           </Form.Group>
-        </Form>   
+        </Form>
 
         <hr />
 
         {isLoading ? (
           <p>Loading issues...</p>
         ) : (
-          <Table striped bordered hover responsive="md" className="table table-sm">
+          <>
+          <Table
+            striped
+            bordered
+            hover
+            responsive="md"
+            className="table table-sm"
+          >
             <thead>
               <tr>
                 <th>Issue ID</th>
@@ -135,6 +152,31 @@ const UnassignedIssues = () => {
               ))}
             </tbody>
           </Table>
+          <ReactPaginate
+          previousLabel={"Previous"}
+          nextLabel={"Next"}
+          breakLabel={<a href="">...</a>}
+          breakClassName={"page-item"}
+          breakLinkClassName={"page-link"}
+          pageCount={pages} // Use the `pages` state
+          // initialPage={currentPage - 1} // Use the `currentPage` state
+          forcePage={currentPage - 1} // Force the current page to be highlighted
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={5}
+          onPageChange={handlePageChange}
+          containerClassName={"pagination justify-content-center"}
+          pageClassName={"page-item"}
+          pageLinkClassName={"page-link"}
+          activeClassName={"active"}
+          previousClassName={"page-item"}
+          nextClassName={"page-item"}
+          previousLinkClassName={"page-link"}
+          nextLinkClassName={"page-link"}
+          disabledClassName={"disabled"}
+          size={"sm"}
+          shape={"circle"}
+        />
+        </>
         )}
       </div>
     </>

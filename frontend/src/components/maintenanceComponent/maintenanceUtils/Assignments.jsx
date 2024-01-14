@@ -70,7 +70,9 @@ function Assignments() {
             (assignment) =>
               !selectedCategory || assignment.category._id === selectedCategory
           );
-        setAssignments(filteredAssignments);
+          console.log(allAssignments);
+          const sortedAssignments = filteredAssignments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setAssignments(sortedAssignments);
       } catch (error) {
         console.error(error);
       }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Form, FormControl, Select } from "react-bootstrap";
+import ReactPaginate from "react-paginate";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import moment from 'moment';
@@ -10,63 +11,74 @@ const ViewAllIssues = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const navigate = useNavigate();
 
   const fetchCategories = async () => {
     try {
-      const response = axios.get("http://localhost:5000/categories");
-      response
-        .then((response) => {
-          const categories = response.data.categories;
-          setCategories(categories);
-        })
-        .catch((error) => console.error(error));
+      const response = await axios.get("http://localhost:5000/categories");
+      const categories = response.data.categories;
+      setCategories(categories);
     } catch (error) {
       console.error(error);
     }
   };
-
+  
+  const fetchIssues = async (page, category) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:5000/issues?page=${page}`);
+      const { issues, page: currentPage, pages, total } = response.data;
+  
+      // Fetch category and technician data concurrently
+      const promises = issues.map((issue) =>
+        Promise.all([
+          axios.get(`http://localhost:5000/categories/${issue.category._id}`),
+          issue.assignment_history && issue.assignment_history[0]
+            ? axios.get(`http://localhost:5000/users/${issue.assignment_history[0].assigned_to}`)
+            : Promise.resolve(null),
+        ])
+      );
+      const issuesWithDetails = await Promise.all(promises);
+  
+      const updatedIssues = issues.map((issue, index) => ({
+        ...issue,
+        category: issuesWithDetails[index][0]?.data?.category?.category_name ?? null,
+        technician: issuesWithDetails[index][1]?.data?.user_name ?? "Not yet assigned",
+      }));
+  
+      const filteredIssues = updatedIssues.filter((issue) =>
+        !selectedCategory || issue.category === selectedCategory
+      );
+      setIssues(filteredIssues.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setCurrentPage(page);
+      setPages(pages);
+      setTotal(total);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   useEffect(() => {
-    const fetchIssues = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get("http://localhost:5000/issues");
-        const data = response.data;
-        // Fetch category and technician data concurrently
-        const promises = data.issues.map((issue) =>
-          Promise.all([
-            axios.get(`http://localhost:5000/categories/${issue.category._id}`), // Use category instead of category_id
-            issue.assignment_history && issue.assignment_history[0]
-              ? axios.get(
-                  `http://localhost:5000/users/${issue.assignment_history[0].assigned_to}`
-                )
-              : Promise.resolve(null),
-          ])
-        );
-        const issuesWithDetails = await Promise.all(promises);
-        const updatedIssues = data.issues.map((issue, index) => ({
-          ...issue,
-          category:
-            issuesWithDetails[index][0]?.data?.category?.category_name ?? null, // Use category instead of category_id
-          technician:
-            issuesWithDetails[index][1]?.data?.user_name ?? "Not yet assigned",
-        }));
-        const filteredIssues = updatedIssues.filter((issue) =>  !selectedCategory || issue.category === selectedCategory);
-        setIssues(filteredIssues);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchIssues();
+    fetchIssues(currentPage, selectedCategory);
     fetchCategories();
-  }, [selectedCategory]);
-
+  }, [selectedCategory, currentPage]); // Dependency array adjusted
+  
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
+    fetchIssues(currentPage, selectedCategory); // Fetch issues after category change
   };
+  
+  const handlePageChange = (data) => {
+    const newPage = data.selected + 1;
+    setCurrentPage(newPage);
+    fetchIssues(newPage, selectedCategory);
+  };
+
 
   return (
     <>
@@ -91,9 +103,9 @@ const ViewAllIssues = () => {
           </Form.Group>
         </Form>       
         <hr></hr>
-        {isLoading ? (
+        { isLoading ? (
           <p>Loading issues...</p>
-        ) : (
+        ) : ( <>
           <Table striped bordered hover responsive="md" className="table table-sm">
             <thead>
               <tr>
@@ -133,6 +145,31 @@ const ViewAllIssues = () => {
               ))}
             </tbody>
           </Table>
+          <ReactPaginate
+             previousLabel={"Previous"}
+             nextLabel={"Next"}
+             breakLabel={<a href="">...</a>}
+             breakClassName={"page-item"}
+             breakLinkClassName={"page-link"}
+             pageCount={pages} // Use the `pages` state
+             // initialPage={currentPage - 1} // Use the `currentPage` state
+             forcePage={currentPage - 1} // Force the current page to be highlighted
+             marginPagesDisplayed={2}
+             pageRangeDisplayed={5}
+             onPageChange={handlePageChange}
+             containerClassName={"pagination justify-content-center"}
+             pageClassName={"page-item"}
+             pageLinkClassName={"page-link"}
+             activeClassName={"active"}
+             previousClassName={"page-item"}
+             nextClassName={"page-item"}
+             previousLinkClassName={"page-link"}
+             nextLinkClassName={"page-link"}
+             disabledClassName={"disabled"}
+             size={"sm"}
+             shape={"circle"}
+           />
+           </>
         )}
       </div>
     </>
