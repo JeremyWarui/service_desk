@@ -1,31 +1,75 @@
 // App.js
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import UserDashboard from "./components/usersComponent/userDashboard";
 import TechnicianDashboard from "./components/techniciansComponent/technicianDashboard";
 import MaintenanceDashboard from "./components/maintenanceComponent/maintenanceDashboard";
 import Homepage from "./components/homepage";
-import { AuthProvider } from "./components/usersComponent/usersUtils/userContext/AuthContext"; // Import AuthProvider
+import SignUpPage from "./components/services/registerUser";
+import LoginPage from "./components/services/loginUser";
+
+import { TechnicianProvider } from "./components/techniciansComponent/techContext/AuthContext";
+import { AuthProvider } from "./components/usersComponent/userContext/AuthContext";
+
+// import ProtectedRoute from "./components/auth/ProtectedRoute";
+// import { AuthProvider } from "./components/auth/AuthContext";
+// import Cookies from "js-cookie";
+
+// import { useAuth } from "./components/auth/AuthContext";
+// const initialToken = Cookies.get("token");
 
 function App() {
   return (
-    <Router>
-      {/* Other routes for different user roles or functionalities */}
+    // <AuthProvider token={initialToken}>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route element={<AuthProvider>
-          <UserDashboard />
-        </AuthProvider>}
-        path="/users/dashboard/*"
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route
+          path="/maintenance-dashboard/*"
+          element={<MaintenanceDashboard/>}
+        >
+          <Route index element={<MaintenanceDashboard />} />
+        </Route>
+        <Route
+          path="/technicians-dashboard/*"
+          element={
+            <TechnicianProvider>
+              <TechnicianDashboard />
+            </TechnicianProvider>
+          }
         />
         <Route
-          path="/technicians/dashboard/*"
-          element={<TechnicianDashboard />}
+          path="/users-dashboard/*"
+          element={
+            <AuthProvider>
+              <UserDashboard />
+            </AuthProvider>
+          }
         />
-        <Route path="/maintenance/dashboard/*" element={<MaintenanceDashboard />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
+    // </AuthProvider>
   );
 }
 
 export default App;
+// <AuthProvider token={initialToken}>
+//  <BrowserRouter>
+//  <Routes>
+//    <Route path="/" element={<Homepage />} />
+//    <Route path="/login" element={<LoginPage />} />
+//    <Route path="/signup" element={<SignUpPage />} />
+//    <Route path="/maintenance-dashboard/" element={<ProtectedRoute roles={["maintenance_officer"]} />}>
+//      <Route index element={<MaintenanceDashboard />} />
+//    </Route>
+//    <Route path="/technicians-dashboard/*" element={<ProtectedRoute roles={["technician"]} />}>
+//      <Route index element={<TechnicianDashboard />} />
+//    </Route>
+//    <Route path="/users-dashboard/" element={<ProtectedRoute roles={["user"]} />}>
+//      <Route index element={<UserDashboard />} />
+//    </Route>
+//  </Routes>
+// </BrowserRouter>
+// </AuthProvider>

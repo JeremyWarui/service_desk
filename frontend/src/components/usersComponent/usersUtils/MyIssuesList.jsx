@@ -41,6 +41,7 @@ const MyIssues = () => {
     fetchIssues(); // Refetch issues when category changes
   }, [selectedCategory]);
 
+  
   return (
     <div>
       <h1 className="my-3">My Issues</h1>
@@ -62,9 +63,10 @@ const MyIssues = () => {
           </Form.Select>
         </Form.Group>
       </Form>
-      <Table striped bordered hover responsive>
+      <Table className="table" striped bordered hover responsive>
         <thead>
           <tr>
+            <th>Issue ID</th>
             <th>Issue</th>
             <th>Category</th>
             <th>Status</th>
@@ -75,12 +77,13 @@ const MyIssues = () => {
         <tbody>
           {issues.map((issue) => (
             <tr key={issue._id}>
+              <td>{issue._id}</td>
               <td>{issue.issue_message}</td>
               <td>{issue.category.category_name}</td>
               <td>{issue.issue_status}</td>
               <td>{moment(issue.createdAt).format("DD/MM/YYYY")}</td>
               <td>
-              <Button variant="primary" onClick={() => {
+              <Button variant="primary" size="sm" onClick={() => {
                 console.log(issue.issue_message);
                 navigate(`/users/dashboard/issue-details/${issue._id}`)}
               }>

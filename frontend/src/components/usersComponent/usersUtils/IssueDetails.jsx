@@ -51,8 +51,10 @@ const IssueDetails = () => { // Remove match prop
       {isLoading && <Spinner animation="border" />}
       {error && <div>{error.message}</div>}
       {id && !isLoading && !error && ( // Use id from params
-        <Card>
-          <Card.Header>Issue Details</Card.Header>
+        <Card className="mt-3">
+          <Card.Header>
+            <h2>Issue Details</h2>
+          </Card.Header>
           <Card.Body>
             <Table striped bordered hover>
               <tbody>

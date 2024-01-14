@@ -9,7 +9,9 @@ class IssuesController {
     try {
       // Check database connection before proceeding
       if (!(await dbService.isConnected())) {
-        return res.status(500).json({ error: "Database connection unavailable." });
+        return res
+          .status(500)
+          .json({ error: "Database connection unavailable." });
       }
       const { category, issue_message, user, issue_status = "open" } = req.body;
 
@@ -17,7 +19,10 @@ class IssuesController {
       if (!category) validationErrors.push("Missing category");
       if (!issue_message) validationErrors.push("Missing issue message");
       if (!user) validationErrors.push("Missing user");
-      if (!issue_status || !["open", "in-progress", "resolved", "closed"].includes(issue_status)) {
+      if (
+        !issue_status ||
+        !["open", "in-progress", "resolved", "closed"].includes(issue_status)
+      ) {
         validationErrors.push("Invalid issue status");
       }
       if (validationErrors.length > 0) {
@@ -30,14 +35,14 @@ class IssuesController {
       const foundCategory = await Category.findById(category);
       if (!foundCategory)
         return res.status(404).json({ error: "Category not found" });
-  
+
       const newIssue = new Issue({
         category,
         issue_message,
         user,
         issue_status,
       });
-  
+
       await newIssue.save();
 
       return res.status(201).json({
@@ -52,7 +57,6 @@ class IssuesController {
       return res.status(500).json({ error: "Something went wrong" });
     }
   }
-  
 
   static async getAllIssues(req, res) {
     try {
@@ -63,15 +67,29 @@ class IssuesController {
           .json({ error: "Database connection unavailable." });
       }
 
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 20;
+      const category = req.query.category;
+
+      const skip = (page - 1) * pageSize;
+      const limit = pageSize;
+
+      // Get the total number of issues
+      const total = await Issue.countDocuments();
+
       const issues = await Issue.find({})
         .populate([
           { path: "user", select: "user_name" },
           { path: "category", select: "category_name" },
         ])
+        .skip(skip)
+        .limit(limit)
         .lean()
         .exec();
 
-      return res.status(200).json({ issues });
+      // Calculate the total pages
+      const pages = Math.ceil(total / pageSize);
+      return res.status(200).json({ issues, page, pages, total });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
@@ -94,14 +112,14 @@ class IssuesController {
         issue_status: 1,
         assignment_history: 1,
         createdAt: 1,
-        updatedAt: 1
+        updatedAt: 1,
       })
         .populate([
           { path: "user", select: "user_name" },
           { path: "category", select: "category_name" },
           {
             path: "assignment_history.assigned_to",
-            select: "user_name assigned_date",
+            select: "user_name",
           },
         ])
         .lean()
@@ -120,6 +138,7 @@ class IssuesController {
         },
         { user_name: 1, user_role: 1 }
       ).lean();
+      // console.log(result);
 
       const issue = {
         id: result._id,
@@ -128,11 +147,12 @@ class IssuesController {
         status: result.issue_status,
         raiseeName: result.user.user_name,
         assignedTechnician: assignedPerson,
-        assignedDate: result.assignment_history[0].assigned_date,
-        updateDate: result.updatedAt,
+        assignedDate: result.assignment_history[0]?.assigned_date || "",
+        updateDate: result.updatedAt || "",
         techniciansList: technicians,
       };
 
+      // console.log(issue);
       return res.status(200).json({ issue });
     } catch (error) {
       console.error(error);
@@ -146,7 +166,7 @@ class IssuesController {
       const issue = await Issue.findById(issueId);
 
       if (!issue) return res.status(404).json({ error: "Issue not found" });
-      
+
       const validUpdates = [
         "issue_message",
         "issue_status",
@@ -176,7 +196,12 @@ class IssuesController {
         .populate("user")
         .populate("category");
 
-      return res.status(200).json({ issue: updatedIssue, updatedDate: moment(updatedIssue.updatedAt).format("DD/MM/YYYY") });
+      return res
+        .status(200)
+        .json({
+          issue: updatedIssue,
+          updatedDate: moment(updatedIssue.updatedAt).format("DD/MM/YYYY"),
+        });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
@@ -219,12 +244,9 @@ class IssuesController {
         return res.status(400).json({ error: "Invalid user ID" });
       }
       const issues = await Issue.find({ user: userId })
-       .populate([
-        {path: "category"},
-        {path: "user", select: "user_name"}
-       ])
-       .lean()
-       .exec();
+        .populate([{ path: "category" }, { path: "user", select: "user_name" }])
+        .lean()
+        .exec();
       return res.status(200).json({ issues });
     } catch (error) {
       console.error(error);

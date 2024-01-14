@@ -1,33 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Table, Form, Button, Alert, Row, Col, Card } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Table,Form,Button,Alert,Row, Col,Card,Spinner,FormGroup,FormControl,FormLabel} from "react-bootstrap";
 import moment from "moment";
-import "./tablesStyles.css";
 
-function AssignmentDetails({ match, history, location }) {
+function UpdateAssignment() {
   const { id } = useParams();
-  const [assignment, setAssignment] = useState(null);
-  const [updatedAssignment, setUpdatedAssignment] = useState(null);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [assignment, setAssignment] = useState();
+  const [updatedAssignment, setUpdatedAssignment] = useState();
   const [message, setMessage] = useState("");
-  const fetchAssignment = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/assignments/${id}`
-      );
-      const assignment = response.data.assignment;
-      setAssignment(assignment);
-      setUpdatedAssignment(assignment);
-      console.log(assignment);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   useEffect(() => {
+    const fetchAssignment = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/assignments/${id}`);
+        console.log(response);
+        const assignment = response.data.assignment;
+        
+        setAssignment(assignment);
+        setUpdatedAssignment(assignment);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setMessage("Error fetching assignment");
+      }
+    };
     fetchAssignment();
   }, [id]);
+
+  console.log(assignment);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,30 +40,34 @@ function AssignmentDetails({ match, history, location }) {
     }));
   };
 
+  console.log(id);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Make a PUT request to the server endpoint that updates the assignment by id
-      const response = await axios
-        .put(`http://localhost:5000/assignments/${id}`, updatedAssignment)
-        .then(() => {
-          navigate(-1); // Navigate to the previous page
-        });
-      setMessage(response.data.assignment);
+      console.log(id);
+      const response = await axios.patch(`http://localhost:5000/techAssignments/${id}`, updatedAssignment);
+      console.log(id);
+      console.log("patch: ", response);
+      console.log("updated: ", updatedAssignment);
+      setMessage("Assignment updated successfully!");
+      navigate(-1); // Navigate back
     } catch (error) {
+      console.log(error.message);
       setMessage(error.response.data.error);
     }
   };
   // Define a variable to get the navigate function from the useNavigate hook
-  const navigate = useNavigate();
   const handleBack = () => {
     navigate(-1);
   };
 
   return (
     <div className="container">
-      <h1 className="py-4">Assignment Details</h1>
+      <h1 className="py-4">Update Page</h1>
       <hr></hr>
+      {loading && <Spinner animation="border" role="status">Loading...</Spinner>}
+      {message && <Alert variant="info">{message}</Alert>}
       {assignment && (
         <>
           <Table striped bordered hover responsive="md" className="table table-sm">
@@ -97,7 +104,7 @@ function AssignmentDetails({ match, history, location }) {
                   <span style={{ color: "green", fontWeight: "bold" }}>Low</span>
                 )}
               </td>
-                <td>{assignment.deadline}</td>
+                <td>{moment(assignment.deadline).format("DD/MM/YYYY")}</td>
               </tr>
             </tbody>
           </Table>
@@ -125,9 +132,11 @@ function AssignmentDetails({ match, history, location }) {
                     onChange={handleChange}
                   >
                     <option value="pending">Pending</option>
-                    <option value="assigned">Assigned</option>
+                    <option value="open">Open</option>
                     <option value="in-progress">In Progress</option>
+                    <option value="pending">Pending</option>
                     <option value="completed">Completed</option>
+                    {/* <option value="completed">Closed</option> */}
                   </Form.Control>
                 </Form.Group>
               </Col>
@@ -137,13 +146,14 @@ function AssignmentDetails({ match, history, location }) {
                   <Form.Control
                     as="select"
                     name="priority"
-                    value={updatedAssignment.priority}
+                    value={updatedAssignment.priority ?? "3"}
                     onChange={handleChange}
                   >
                     <option value="1">High</option>
                     <option value="2">Medium</option>
                     <option value="3">Low</option>
                   </Form.Control>
+                  {console.log(updatedAssignment)}
                 </Form.Group>
               </Col>
               <Col md={4}>
@@ -152,7 +162,7 @@ function AssignmentDetails({ match, history, location }) {
                   <Form.Control
                     type="date"
                     name="deadline"
-                    value={updatedAssignment.deadline}
+                    value={updatedAssignment.deadline || new Date().toISOString().slice(0, 10)}
                     onChange={handleChange}
                   />
                 </Form.Group>
@@ -174,7 +184,7 @@ function AssignmentDetails({ match, history, location }) {
                 </Button>
               </Col>
               <Col md={6}>
-                {message && <Alert variant="info">{message}</Alert>}
+                
                 <Button variant="secondary" onClick={handleBack}>
                   Back
                 </Button>
@@ -187,4 +197,4 @@ function AssignmentDetails({ match, history, location }) {
   );
 }
 
-export default AssignmentDetails;
+export default UpdateAssignment;

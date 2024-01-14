@@ -18,7 +18,6 @@ const AuthProvider = ({ children }) => {
         setUser(response.data);
       } catch (error) {
         console.error("Error fetching user:", error);
-        // Handle errors gracefully
       }
     };
 

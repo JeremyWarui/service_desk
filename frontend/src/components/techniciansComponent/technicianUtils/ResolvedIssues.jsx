@@ -1,27 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Table, Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
+import { TechnicianContext } from '../techContext/AuthContext';
 
-const AssignedIssues = () => {
+const ResolvedAssignments = () => {
   const [assignments, setAssignments] = useState([]);
-  const [technicianId, setTechnicianId] = useState('');
-  const [loading, setLoading] = useState(false); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [technicianId, setTechnicianId] = useState();
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  // const { technicianId } = useParams();
-
+  const { technician } = useContext(TechnicianContext);
   const fetchAssignments = async () => {
     try {
-      // Make a GET request to the specific technician's assignments endpoint
-      // console.log("fetchassignments id: " ,technicianId);
-      const response = await axios.get(`http://localhost:5000/techAssignments/${technicianId}`);
+      console.log("fetchassignments id: " ,technician._id);
+      const response = await axios.get(`http://localhost:5000/techAssignments/${technician._id}`);
       const assignmentsData = response.data.assignments;
-      // console.log(assignmentsData);
+      console.log(assignmentsData);
       setAssignments(assignmentsData);
     } catch (error) {
-      setError('Error fetching assignments. Please try again.'); // Set error state
+      setError('Error fetching assignments. Please try again.');
     } finally {
       setLoading(false); // Set loading state to false after completion
     }
@@ -29,10 +28,7 @@ const AssignedIssues = () => {
 
   useEffect(() => {
     setLoading(true); // Set loading state to true initially
-    // Retrieve technician ID from login details or user context
-    const retrievedTechnicianId = "657c5a4e6bef093354653d28";
-    // console.log("retrived_id: ", retrievedTechnicianId);
-    setTechnicianId(retrievedTechnicianId);
+    setTechnicianId(technician._id);
     fetchAssignments();
   }, [technicianId]);
 
@@ -42,11 +38,12 @@ const AssignedIssues = () => {
     fetchAssignments();
   };
 
+  const filteredAssignments = assignments.filter(assignment => assignment.status === "completed");
   return (
     <div className="container">
       {loading && <p className="loading-message">Loading assignments...</p>}
       {error && <div className="error-message">{error} <button onClick={() => handleRetry()}>Retry</button></div>}
-      <h1 className="py-4">Your Assignments</h1>
+      <h1 className="py-4">Resolved Assignments</h1>
       <hr />
       <Table striped bordered hover responsive="md" className="table table-sm">
         <thead>
@@ -60,11 +57,12 @@ const AssignedIssues = () => {
             <th>Status</th>
             <th>Priority</th>
             <th>Deadline</th>
+            <th>Resolved On</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          {assignments.map((assignment) => (
+          {filteredAssignments.map((assignment) => (
             <tr key={assignment._id}>
               <td>{assignment._id}</td>
               {/* <td>{assignment.category.category_name}</td> */}
@@ -82,20 +80,19 @@ const AssignedIssues = () => {
                   <span style={{ color: "green", fontWeight: "bold" }}>Low</span>
                 )}
               </td>
-              <td>{assignment.deadline}</td>
+              <td>{moment(assignment.deadline).format("DD/MM/YYYY")}</td>
+              <td>{moment(assignment.resolved_date).format("DD/MM/YYYY")}</td>
               <td>
-                {/* Use the Button component to create a button that navigates to the assignment details page */}
                 <Button
                   variant="primary"
-                  size="sm"
                   onClick={() =>
                     navigate(
-                      `/technicians/dashboard/assignments-details/${assignment._id}`,
+                      `/technicians/dashboard/resolved-details/${assignment._id}`,
                       { state: { assignment } }
                     )
                   }
                 >
-                  Update
+                  View
                 </Button>
               </td>
             </tr>
@@ -106,4 +103,5 @@ const AssignedIssues = () => {
   );
 };
 
-export default AssignedIssues;
+export default ResolvedAssignments;
+

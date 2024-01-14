@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { FaBars, FaTimes, FaHome, FaFilter } from "react-icons/fa";
+import {
+  FaBars,
+  FaTimes,
+  FaHome,
+  FaPlusCircle,
+  FaUserCircle,
+  FaList,
+  FaCog,
+} from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const NavigationMenu = () => {
@@ -37,29 +45,31 @@ const NavigationMenu = () => {
       >
         <div className="offcanvas-body">
           <div className="d-flex">
-            <h2 className="mb-4">Welcome</h2>
+            <h3 className="mb-5">Explore Issues</h3>  {/* Updated title */}
           </div>
           <nav className="nav flex-column mb-auto">
             <NavLink
               to="all-issues"
-              className="nav-link"
-              aria-current="page" // Active link logic handled by React Router
+              className="nav-link mb-4"
+              aria-current="page"
             >
               <FaHome className="me-2" /> All Issues
             </NavLink>
-            <NavLink to="report-issue" className="nav-link">
-              <FaFilter className="me-2" /> Post New Issue
-            </NavLink>
-            <NavLink to="my-issues" className="nav-link">
-              <FaFilter className="me-2" /> My Issues
-            </NavLink>
-            {/* Add additional tabs as needed */}
+            <NavLink to="report-issue" className="nav-link mb-4">
+              <FaPlusCircle className="me-2" /> Report Issue
+            </NavLink>  {/* Updated icon and text */}
+            <NavLink to="my-issues" className="nav-link mb-4">
+              <FaUserCircle className="me-2" /> My Issues
+            </NavLink>  {/* Updated icon */}
+            <NavLink to="categories" className="nav-link mb-4">
+              <FaList className="me-2" /> Categories
+            </NavLink>  {/* Added new link */}
           </nav>
           <hr />
           <div className="d-flex">
             <NavLink to="account-settings" className="btn btn-primary btn-sm">
-              Account Settings
-            </NavLink>
+              <FaCog className="me-2" /> Account Settings
+            </NavLink>  {/* Updated icon */}
           </div>
         </div>
       </div>

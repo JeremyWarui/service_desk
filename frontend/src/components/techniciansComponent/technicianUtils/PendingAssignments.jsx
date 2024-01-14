@@ -1,53 +1,78 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Button } from "react-bootstrap";
+import {
+  Table,
+  Button,
+  DropdownButton,
+  Dropdown,
+  ButtonGroup,
+} from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
 
 const PendingAssignments = () => {
   const [assignments, setAssignments] = useState([]);
   const [technicianId, setTechnicianId] = useState('');
-  const [loading, setLoading] = useState(false); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [sortBy, setSortBy] = useState('due_date'); // Add sorting state
   const navigate = useNavigate();
-  // const { technicianId } = useParams();
 
-  const fetchAssignments = async () => {
-    try {
-      // Make a GET request to the specific technician's assignments endpoint
-      // console.log("fetchassignments id: " ,technicianId);
-      const response = await axios.get(`http://localhost:5000/techAssignments/${technicianId}`);
-      const assignmentsData = response.data.assignments;
-      // console.log(assignmentsData);
-      setAssignments(assignmentsData);
-    } catch (error) {
-      setError('Error fetching assignments. Please try again.'); // Set error state
-    } finally {
-      setLoading(false); // Set loading state to false after completion
-    }
-  };
   useEffect(() => {
-    setLoading(true); // Set loading state to true initially
-    // Retrieve technician ID from login details or user context
-    const retrievedTechnicianId = "657c5a4e6bef093354653d28";
-    // console.log(retrievedTechnicianId);
-    setTechnicianId(retrievedTechnicianId);
+    setLoading(true);
+    const fetchedTechnicianId = "657c5a4e6bef093354653d28"; // Replace with actual retrieval
+    setTechnicianId(fetchedTechnicianId);
     fetchAssignments();
   }, [technicianId]);
 
-  // Define handleRetry function to clear error and refetch assignments
-  const handleRetry = () => {
-    setError(null);
-    fetchAssignments();
+  const fetchAssignments = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/techAssignments/${technicianId}`);
+      const assignmentsData = response.data.assignments;
+      setAssignments(assignmentsData);
+    } catch (error) {
+      setError('Error fetching assignments. Please refresh the page.');
+    } finally {
+      setLoading(false);
+    }
   };
-  const filteredAssignments = assignments.filter(assignment => assignment.status === "in-progress" || assignment.status === "pending");
+
+  const sortOptions = [
+    { value: 'due_date', label: 'Due Date' },
+    { value: 'priority', label: 'Priority' },
+  ];
+
+  const filteredAssignments = assignments.filter(
+    (assignment) => assignment.status === "in-progress" || assignment.status === "pending"
+  ).sort((a, b) => {
+    if (sortBy === 'priority') {
+      return a.priority - b.priority;
+    } else if (sortBy === 'due_date') {
+      return new Date(b.deadline) - new Date(a.deadline);
+    }
+    return 0;
+  });
 
   return (
     <div className="container">
       {loading && <p className="loading-message">Loading assignments...</p>}
-      {error && <div className="error-message">{error} <button onClick={() => handleRetry()}>Retry</button></div>}
+      {/* {error && <div className="error-message">{error}</div>} */}
       <h1 className="py-4">Pending Assignments</h1>
       <hr />
+      <div className="d-flex justify-content-between mb-3">
+        <h4 className="mb-0">Sort By:</h4>
+        <DropdownButton
+          as={ButtonGroup}
+          title={sortOptions.find((option) => option.value === sortBy).label}
+          onSelect={(event) => setSortBy(event.key)}
+        >
+          {sortOptions.map((option) => (
+            <Dropdown.Item key={option.value} eventKey={option.value}>
+              {option.label}
+            </Dropdown.Item>
+          ))}
+        </DropdownButton>
+      </div>
       <Table striped bordered hover responsive="md" className="table table-sm">
         <thead>
           <tr>
@@ -82,7 +107,7 @@ const PendingAssignments = () => {
                   <span style={{ color: "green", fontWeight: "bold" }}>Low</span>
                 )}
               </td>
-              <td>{assignment.deadline}</td>
+              <td>{moment(assignment.deadline).format("DD/MM/YYYY")}</td>
               <td>
                 {/* Use the Button component to create a button that navigates to the assignment details page */}
                 <Button

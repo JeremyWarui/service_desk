@@ -1,14 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button } from "react-bootstrap";
+import { Table, Button, Form, FormControl, Select } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import moment from 'moment';
 import "./tablesStyles.css";
 
-const DisplayIssues = () => {
+const ViewAllIssues = () => {
   const [issues, setIssues] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
+
+  const fetchCategories = async () => {
+    try {
+      const response = axios.get("http://localhost:5000/categories");
+      response
+        .then((response) => {
+          const categories = response.data.categories;
+          setCategories(categories);
+        })
+        .catch((error) => console.error(error));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     const fetchIssues = async () => {
@@ -16,7 +32,6 @@ const DisplayIssues = () => {
       try {
         const response = await axios.get("http://localhost:5000/issues");
         const data = response.data;
-
         // Fetch category and technician data concurrently
         const promises = data.issues.map((issue) =>
           Promise.all([
@@ -28,9 +43,7 @@ const DisplayIssues = () => {
               : Promise.resolve(null),
           ])
         );
-
         const issuesWithDetails = await Promise.all(promises);
-
         const updatedIssues = data.issues.map((issue, index) => ({
           ...issue,
           category:
@@ -38,8 +51,8 @@ const DisplayIssues = () => {
           technician:
             issuesWithDetails[index][1]?.data?.user_name ?? "Not yet assigned",
         }));
-        const unassigned = updatedIssues.filter((issue) => issue.technician === "Not yet assigned");
-        setIssues(unassigned);
+        const filteredIssues = updatedIssues.filter((issue) =>  !selectedCategory || issue.category === selectedCategory);
+        setIssues(filteredIssues);
       } catch (error) {
         console.error(error);
       } finally {
@@ -48,12 +61,35 @@ const DisplayIssues = () => {
     };
 
     fetchIssues();
-  }, []);
+    fetchCategories();
+  }, [selectedCategory]);
+
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
 
   return (
     <>
       <div>
-        <h1 className="py-3">Maintenance Issues</h1>
+        <h1 className="py-3">Requests</h1>
+         <Form className="mb-3">
+          <Form.Group controlId="filterCategory">
+            <Form.Label>Filter by Category:</Form.Label>
+            <Form.Control
+                as="select"
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+              >
+                <option value="">Select Category</option>
+                <option value="">All Categories</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category.category_name}>
+                    {category.category_name}
+                  </option>
+                ))}
+              </Form.Control>
+          </Form.Group>
+        </Form>       
         <hr></hr>
         {isLoading ? (
           <p>Loading issues...</p>
@@ -103,4 +139,4 @@ const DisplayIssues = () => {
   );
 };
 
-export default DisplayIssues;
+export default ViewAllIssues;

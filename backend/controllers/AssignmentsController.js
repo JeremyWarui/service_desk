@@ -14,11 +14,19 @@ class AssignmentsController {
           .status(500)
           .json({ error: "Database connection unavailable." });
       }
+      console.log(req.body);
       const { technician_id, issue_id, status, priority, deadline } = req.body;
+      console.log("technician_id: ", technician_id);
+      console.log("issue_id: ", issue_id);
+      console.log("status: ", status);
+      console.log("deadline: ", deadline);
+      console.log("priority: ", priority);
+     
 
       // Change the category_id field to category
       const { category } = req.body;
-
+       console.log("category_id: ", category);
+      // if (!technician_id || !issue_id || !status || !priority || !category) 
       if (!technician_id || !issue_id || !status || !priority || !category) {
         return res.status(400).json({ error: "Missing required fields" });
       }
@@ -35,23 +43,32 @@ class AssignmentsController {
         technician: technician_id,
         user: issue.user,
         issue: issue_id,
-        category: category,
+        category: issue.category._id,
         status: status,
         priority: priority,
         deadline: deadline,
       });
+      console.log("created new obj: ", newAssignment);
 
       // Push the new assignment to the assignment_history of the issue
-      issue.assignment_history.push(newAssignment);
+      issue.issue_status = status;
+      issue.assignment_history.push(
+        {
+          assigned_to: technician_id,
+          assigned_date: newAssignment.assigned_date
+        });
+      
       await issue.save();
 
       // Save the new assignment to the database
       await newAssignment.save();
-
       // Return a success response with the new assignment
+      console.log("success: ", issue);
       return res.status(201).json({ newAssignment });
+      
     } catch (error) {
-      return res.status(500).json({ error: "Something went wrong" });
+      console.log(error.message);
+      return res.status(500).json({ error: error.message });
     }
   }
 
@@ -167,16 +184,14 @@ class AssignmentsController {
 
       if (status) {
         assignment.status = status;
-        const issue = await Issue.findById(assignment.issue_id);
+        const issue = await Issue.findById(assignment.issue);
         // Update issue status based on assignment status mapping
-        if (status === "completed") {
-          issue.status = "resolved";
+        if (assignment.status === "completed") issue.issue_status = "resolved";
+        if (resolved_date) {
+          issue.resolved_date = new Date(resolved_date);
+          assignment.resolved_date = new Date(resolved_date);
         }
-        if (resolved_date) issue.resolved_date = new Date(resolved_date);
-        // update the issue
-        issue.issue_status = status;
-        console.log(issue);
-
+        
         await issue.save();
       }
       if (priority) assignment.priority = priority;
@@ -186,8 +201,6 @@ class AssignmentsController {
       await assignment.save();
 
       const updatedAssignment = await Assignment.findById(assignmentId);
-      console.log(updatedAssignment);
-
       return res.status(200).json({ assignment: updatedAssignment });
     } catch (error) {
       console.error(error);

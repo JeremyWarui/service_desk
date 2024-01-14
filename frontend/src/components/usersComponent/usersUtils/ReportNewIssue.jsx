@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Spinner, Card, Form, Button } from "react-bootstrap";
+import { Spinner, Card, Form, Button, Alert } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
-import { AuthContext }from "../userContext/AuthContext"; // Assuming your auth context path
+import { AuthContext } from "../userContext/AuthContext"; // Assuming your auth context path
 
 const ReportIssueForm = () => {
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [issueMessage, setIssueMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [success, setSuccess] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { userId } = useContext(AuthContext); // Get user ID from context
-
+  const { user } = useContext(AuthContext); // Get user ID from context
+ 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -33,11 +34,15 @@ const ReportIssueForm = () => {
     e.preventDefault();
     try {
       await axios.post("http://localhost:5000/issues", {
-        user: userId, // Include user ID in the request
-        category: selectedCategory._id,
+        user: user._id, // Include user ID in the request
+        category: selectedCategory,
         issue_message: issueMessage,
       });
-      navigate("/my-issues"); // Redirect to myIssues after successful submission
+      setSuccess("Successfully submitted your issue!");
+      setTimeout(() => {
+        navigate("/users/dashboard/my-issues"); 
+      }, 1000);
+      // Redirect to myIssues after successful submission
     } catch (error) {
       // Handle submission error
       console.error(error);
@@ -53,6 +58,7 @@ const ReportIssueForm = () => {
       <Card.Header>New Issue</Card.Header>
       <Card.Body>
         {isLoading && <Spinner animation="border" />}
+        {success && <Alert variant="success">{success}</Alert>}
         {error && <div>{error.message}</div>}
         {!isLoading && !error && (
           <Form onSubmit={handleSubmit}>
@@ -61,7 +67,7 @@ const ReportIssueForm = () => {
               <Form.Select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
                 <option value="">Select Category</option>
                 {categories.map((category) => (
-                  <option key={category._id} value={category}>
+                  <option key={category._id} value={category._id}>
                     {category.category_name}
                   </option>
                 ))}

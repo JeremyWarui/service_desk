@@ -21,7 +21,7 @@ const IssueSchema = new Schema(
     issue_status: {
       type: String,
       required: true,
-      enum: ["open", "in-progress", "resolved", "closed"],
+      enum: ["open", "in-progress", "pending", "resolved", "closed"],
     },
     issue_resolution: {
       type: String,

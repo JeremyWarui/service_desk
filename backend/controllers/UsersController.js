@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import User from "../models/User";
 import dbService from "../services/dbService";
 import Category from "../models/Category";
+import jwt from "jsonwebtoken";
 
 class UsersController {
   static async createUser(req, res) {
@@ -95,6 +96,45 @@ class UsersController {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
+    }
+  }
+
+  static async getMe(req, res) {
+    try {
+      const token = req.headers.authorization?.split(" ")[1];
+      if (!token) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log(decoded);                                                                    
+      const user = await User.findById(decoded.id);
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      console.log(user);
+
+      return res.status(200).json(user);
+    } catch (error) {
+      console.error("Error fetching user information:", error);
+      res.status(500).json({ error: "Something went wrong" });
+    }
+  }
+
+  static async getUserByUserName(userName) {
+    try {
+      // Check database connection before proceeding
+      if (!(await dbService.isConnected())) {
+        throw new Error("Database connection unavailable.");
+      }
+      // Find user by username using Mongoose's findOne method
+      const user = await User.findOne({ user_name: userName });
+      return res.status(200).json({ user });
+    } catch (error) {
+      console.error(error);
+      throw new Error("Failed tor retrieve user");
     }
   }
 

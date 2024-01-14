@@ -8,27 +8,29 @@ const ResolvedAssignmentDetails = () => {
   const [resolvedAssignment, setResolvedAssignment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { assignmentId } = useParams();
+  const { id } = useParams();
+  console.log(id);
 
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://localhost:5000/assignments/${id}`);
+      setResolvedAssignment(response.data.assignment);
+    } catch (error) {
+      setError("Error fetching assignment details. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`http:localhost:5000/assignments/${assignmentId}`);
-        setResolvedAssignment(response.data);
-      } catch (error) {
-        setError("Error fetching assignment details. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
-  }, [assignmentId]);
+    // console.log(resolvedAssignment);
+  }, [id]);
 
   // Define a function to handle the retry button click
   const handleRetry = () => {
     setError(null);
-    // eslint-disable-next-line no-undef
     fetchData();
   };
 
@@ -45,7 +47,7 @@ const ResolvedAssignmentDetails = () => {
         <Row>
           <Col>
             <Card bg="light" border="primary" text="dark">
-              <Card.Header>Issue ID: {resolvedAssignment._id}</Card.Header>
+              <Card.Header>Issue ID: {resolvedAssignment.id}</Card.Header>
               <Table striped bordered hover>
                 <thead>
                   <tr>
@@ -56,11 +58,11 @@ const ResolvedAssignmentDetails = () => {
                 <tbody>
                   <tr>
                     <td>Category</td>
-                    <td>{resolvedAssignment.category.name}</td>
+                    <td>{resolvedAssignment.category}</td>
                   </tr>
                   <tr>
                     <td>Message</td>
-                    <td>{resolvedAssignment.issue.issue_message}</td>
+                    <td>{resolvedAssignment.issue}</td>
                   </tr>
                   <tr>
                     <td>Status</td>
@@ -98,7 +100,7 @@ const ResolvedAssignmentDetails = () => {
                   </tr>
                   <tr>
                     <td>Deadline</td>
-                    <td>{resolvedAssignment.deadline}</td>
+                    <td>{moment(resolvedAssignment.deadline).format("DD/MM/YYYY")}</td>
                   </tr>
                   <tr>
                     <td>Resolved Date</td>

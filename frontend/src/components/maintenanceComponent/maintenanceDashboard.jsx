@@ -3,13 +3,14 @@ import { Container, Row, Col } from "react-bootstrap";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import ManageCategories from "./maintenanceUtils/manageCategories";
-import AssignIssues from "./maintenanceUtils/assignIssues";
+import CreateAssignment from "./maintenanceUtils/CreateAssignment";
 // import Reports from "./maintenanceUtils/Reports";
 // import AccountSettings from "./maintenanceUtils/AccountSettings";
-import MaintenanceNavigationMenu from "./maintenanceUtils/navigationBar";
-import DisplayIssues from "./maintenanceUtils/displayIssues";
-import Assignments from "./maintenanceUtils/allAssignments";
-import AssignmentDetails from "./maintenanceUtils/assignmentDetails";
+import MaintenanceNavigationMenu from "./maintenanceUtils/MaintenanceNavBar";
+import Assignments from "./maintenanceUtils/Assignments";
+import ViewAllIssues from "./maintenanceUtils/ViewAllIssues";
+import UnassignedIssues from "./maintenanceUtils/UnAssignedIssues";
+import UpdateAssignment from "./maintenanceUtils/UpdateAssignments";
 
 const MaintenanceOfficerDashboard = () => {
   const [activeTab, setActiveTab] = useState("issues"); // Change the default active tab to issues
@@ -30,17 +31,14 @@ const MaintenanceOfficerDashboard = () => {
           {/* Main content area */}
           <Col sm={10}>
             <Routes>
-              {/* Change the default route to redirect to the issues component*/}
-              <Route path="*" element={<Navigate to="issues" />} />
-              {/* Add a route for the issues component */}
-              <Route path="issues" element={<DisplayIssues />} />{" "}
-              {/* Add a route for the assignments component */}
+              <Route path="*" element={<Navigate to="assignments" />} />
+              <Route path="issues" element={<ViewAllIssues />} />{" "}
+              <Route path="not-assigned" element={<UnassignedIssues />} />{" "}
               <Route path="assignments" element={<Assignments />} />
-              {/* Add a route for the assignment details component with the assignment id as a URL parameter */}
-              <Route path="assignments/:id" element={<AssignmentDetails />} />
+              <Route path="assignments/:id" element={<UpdateAssignment />} />
               <Route path="manage-categories" element={ <Col sm={9}> <ManageCategories /> </Col>} />
-              <Route path="assign-issues" element={ <Col sm={10}> <AssignIssues /> </Col> } />
-              <Route path="assign-issues/:id" element={ <Col sm={10}> <AssignIssues /> </Col> } />{" "}
+              {/* <Route path="assign-issues" element={ <Col sm={10}> <CreateAssignment /> </Col> } /> */}
+              <Route path="assign-issues/:id" element={ <Col sm={10}> <CreateAssignment /> </Col> } />{" "}
               {/* Add a route for updating a specific issue*/}
               {/* <Route path="reports" element={<Reports />} /> */}
               {/* <Route path="account-settings" element={<AccountSettings />} /> */}

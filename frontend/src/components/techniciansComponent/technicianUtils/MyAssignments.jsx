@@ -1,45 +1,52 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Table, Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+import { Table, Button, ButtonGroup, DropdownButton, Dropdown } from 'react-bootstrap';
+import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
-import "./tablesStyles.css";
+import { TechnicianContext } from '../techContext/AuthContext';
 
-function Assignments() {
-  // Define a state variable to store the assignments data
+const MyAssignments = () => {
   const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [sortBy, setSortBy] = useState('priority'); // Add sorting state
+  const [selectedSortOption, setSelectedSortOption] = useState('createdAt');
   const navigate = useNavigate();
+
+  const { technician } = useContext(TechnicianContext);
+
   const fetchAssignments = async () => {
     try {
-      // Make a GET request to the /api/assignments endpoint
-      const response = await axios.get("http://localhost:5000/assignments");
-      const allAssignments = response.data.assignments;
-      setAssignments(allAssignments);
-      console.log(allAssignments);
+      const response = await axios.get(`http://localhost:5000/techAssignments/${technician._id}`);
+      const assignmentsData = response.data.assignments;
+      console.log(assignmentsData);
+      setAssignments(assignmentsData);
+      setLoading(false);
     } catch (error) {
-      // Handle any errors
-      console.error(error);
+      setError('Error fetching assignments. Please refresh the page.'); 
     }
   };
-  // Call the fetchAssignments function when the component mounts
-  useEffect(() => {
-    fetchAssignments();
-  }, []);
 
-  // Return the JSX code to render the component
+  useEffect(() => {
+    setLoading(true); // Set loading state to true initially
+    fetchAssignments();
+    // sortAssignments();
+  }, [technician._id]);
+
   return (
     <div className="container">
-      <h1 className="py-4">Assignments</h1>
-      <hr></hr>
+      {loading && <p className="loading-message">Loading assignments...</p>}
+      {error && <div className="error-message">{error.message}</div>}
+      <h1 className="py-4">My Assignments</h1>
+      <hr />
       <Table striped bordered hover responsive="md" className="table table-sm">
         <thead>
           <tr>
             <th>Issue ID</th>
-            <th>Category</th>
+            {/* <th>Category</th> */}
             <th>Issue</th>
             <th>Reported By</th>
             <th>Reported On</th>
-            <th>Assigned To</th>
             <th>Assigned On</th>
             <th>Status</th>
             <th>Priority</th>
@@ -51,11 +58,10 @@ function Assignments() {
           {assignments.map((assignment) => (
             <tr key={assignment._id}>
               <td>{assignment._id}</td>
-              <td>{assignment.category.category_name}</td>
+              {/* <td>{assignment.category.category_name}</td> */}
               <td>{assignment.issue.issue_message}</td>
               <td>{assignment.user.user_name}</td>
               <td>{moment(assignment.issue.createdAt).format("DD/MM/YYYY")}</td>
-              <td>{assignment.technician.user_name}</td>
               <td>{moment(assignment.assigned_date).format("DD/MM/YYYY")}</td>
               <td>{assignment.status}</td>
               <td>
@@ -67,7 +73,7 @@ function Assignments() {
                   <span style={{ color: "green", fontWeight: "bold" }}>Low</span>
                 )}
               </td>
-              <td>{assignment.deadline}</td>
+              <td>{moment(assignment.deadline).format("DD/MM/YYYY")}</td>
               <td>
                 {/* Use the Button component to create a button that navigates to the assignment details page */}
                 <Button
@@ -75,7 +81,7 @@ function Assignments() {
                   size="sm"
                   onClick={() =>
                     navigate(
-                      `/maintenance/dashboard/assignments/${assignment._id}`,
+                      `/technicians/dashboard/assignment-details/${assignment._id}`,
                       { state: { assignment } }
                     )
                   }
@@ -89,6 +95,6 @@ function Assignments() {
       </Table>
     </div>
   );
-}
+};
 
-export default Assignments;
+export default MyAssignments;

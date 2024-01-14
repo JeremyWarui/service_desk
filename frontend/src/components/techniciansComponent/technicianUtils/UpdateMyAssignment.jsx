@@ -1,29 +1,35 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Table, Form, Button, Alert, Row, Col, Card } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Table,Form,Button,Alert,Row,Col,Card,Spinner } from "react-bootstrap";
 import moment from "moment";
+import { TechnicianContext } from "../techContext/AuthContext";
 
-function TechAssignmentDetails({ match, history, location }) {
+function UpdateMyAssignment() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [assignment, setAssignment] = useState(null);
   const [updatedAssignment, setUpdatedAssignment] = useState(null);
   const [message, setMessage] = useState("");
-  const fetchAssignment = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/assignments/${id}`
-      );
-      const assignment = response.data.assignment;
-      setAssignment(assignment);
-      setUpdatedAssignment(assignment);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const { technician } = useContext(TechnicianContext);
 
   useEffect(() => {
+    const fetchAssignment = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/assignments/${id}`
+        );
+        const assignment = response.data.assignment;
+        console.log(assignment);
+        setAssignment(assignment);
+        setUpdatedAssignment(assignment);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setMessage("Error fetching assignment");
+      }
+    };
     fetchAssignment();
   }, [id]);
 
@@ -33,37 +39,34 @@ function TechAssignmentDetails({ match, history, location }) {
       ...prev,
       [name]: value,
     }));
+    console.log(assignment);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Make a PUT request to the server endpoint that updates the assignment by id
-      const response = await axios
-        .put(`http://localhost:5000/assignments/${id}`, updatedAssignment)
-        .then(() => {
-                // Display a success message
-          alert("Assignment updated successfully");
-          navigate(-1); // Navigate to the previous page
-        });
-      setMessage(response.data.assignment);
+      const response = await axios.patch(
+        `http://localhost:5000/techAssignments/${id}`,
+        updatedAssignment
+      );
+      console.log(updatedAssignment);
+      setMessage("Assignment updated successfully!");
+      navigate(-1); // Navigate back
     } catch (error) {
-      alert("Error updating assignment. Please try again.");
-      setMessage(error.response.data.error);
+      console.error(error);
+      setMessage(error.response.data.error || "Error updating assignment");
     }
-  };
-  // Define a variable to get the navigate function from the useNavigate hook
-  const navigate = useNavigate();
-  const handleBack = () => {
-    navigate(-1);
   };
 
   return (
     <div className="container">
       <h1 className="py-4">Assignment Details</h1>
       <hr></hr>
+      {loading && <Spinner animation="border" role="status">Loading...</Spinner>}
+      {message && <Alert variant="info">{message}</Alert>}
       {assignment && (
         <>
+          {/* Display assignment details table (adjust columns as needed) */}
           <Table striped bordered hover responsive="md" className="table table-sm">
             <thead>
               <tr>
@@ -86,15 +89,21 @@ function TechAssignmentDetails({ match, history, location }) {
                 <td>{moment(assignment.assigned_date).format("DD/MM/YYYY")}</td>
                 <td>{assignment.status}</td>
                 <td>
-                {assignment.priority === 1 ? (
-                  <span style={{ color: "red", fontWeight: "bold" }}>High</span>
-                ) : assignment.priority === 2 ? (
-                  <span style={{ color: "orange", fontWeight: "bold" }}>Medium</span>
-                ) : (
-                  <span style={{ color: "green", fontWeight: "bold" }}>Low</span>
-                )}
-              </td>
-                <td>{assignment.deadline}</td>
+                  {assignment.priority === 1 ? (
+                    <span style={{ color: "red", fontWeight: "bold" }}>
+                      High
+                    </span>
+                  ) : assignment.priority === 2 ? (
+                    <span style={{ color: "orange", fontWeight: "bold" }}>
+                      Medium
+                    </span>
+                  ) : (
+                    <span style={{ color: "green", fontWeight: "bold" }}>
+                      Low
+                    </span>
+                  )}
+                </td>
+                <td>{moment(assignment.deadline).format("DD/MM/YYYY")}</td>
               </tr>
             </tbody>
           </Table>
@@ -111,7 +120,7 @@ function TechAssignmentDetails({ match, history, location }) {
           ))}
           <hr />
           <Form onSubmit={handleSubmit}>
-          <Row>
+            <Row>
               <Col md={4}>
                 <Form.Group controlId="status">
                   <Form.Label>Status</Form.Label>
@@ -172,7 +181,7 @@ function TechAssignmentDetails({ match, history, location }) {
               </Col>
               <Col md={6}>
                 {message && <Alert variant="info">{message}</Alert>}
-                <Button variant="secondary" onClick={handleBack}>
+                <Button variant="secondary" onClick={() => navigate(-1)}>
                   Back
                 </Button>
               </Col>
@@ -184,4 +193,4 @@ function TechAssignmentDetails({ match, history, location }) {
   );
 }
 
-export default TechAssignmentDetails;
+export default UpdateMyAssignment;

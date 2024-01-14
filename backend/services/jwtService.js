@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 /* eslint-disable class-methods-use-this */
-/*import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 class JWTService {
   async generateToken(userName, userRole) {
@@ -24,10 +24,10 @@ class JWTService {
     }
     // Verify the refresh token
     try {
-    //   const decoded = await jwt.verify(
-    //     refreshToken,
-    //     process.env.REFRESH_TOKEN_SECRET,
-    //   );
+      const decoded = await jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET,
+      );
       // If the refresh token is valid, create a new payload with the updated user information
       const payload = { userName, userRole };
       // Sign a new access token with the same secret and options
@@ -64,4 +64,4 @@ class JWTService {
 }
 
 export default JWTService;
-*/
+

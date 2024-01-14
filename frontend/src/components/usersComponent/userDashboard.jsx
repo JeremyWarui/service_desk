@@ -1,17 +1,20 @@
 import React, { useState, useContext } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthContext } from "./usersUtils/userContext/AuthContext"; // Import AuthContext
+import { AuthContext } from "./userContext/AuthContext"; // Import AuthContext
 
 // Import necessary components
-import ReportIssueForm from "./usersUtils/IssuesServices/ReportNewIssue";
-import MyIssues from "./usersUtils/IssuesServices/MyIssuesList";
-import AllIssues from "./usersUtils/IssuesServices/AllIssues";
-import IssueDetails from "./usersUtils/IssuesServices/IssueDetails";
-import UserNavigationMenu from "./usersUtils/IssuesServices/UserNavigation";
+import ReportIssueForm from "./usersUtils/ReportNewIssue";
+import MyIssues from "./usersUtils/MyIssuesList";
+import AllIssues from "./usersUtils/AllIssues";
+import IssueDetails from "./usersUtils/IssueDetails";
+import UserNavigationMenu from "./usersUtils/UserNavigation";
 
+// UserDashboard.js
 const UserDashboard = () => {
-  const { user } = useContext(AuthContext);
+  // const { userRole, token } = useAuth();
+  const { user } = useContext(AuthContext)
+  console.log(user);
   const [activeTab, setActiveTab] = useState("all-issues");
     const handleTabChange = (newTab) => {
     setActiveTab(newTab);
@@ -19,13 +22,12 @@ const UserDashboard = () => {
   };
 
   return (
-    <>
-      {user && user.user_role === "user" ? (
         <>
           <Container fluid>
             <Row>
               {/* Navigation menu */}
               <Col sm={2} className="bg-light" style={{ height: "100%" }}>
+                  {/* <UserNavigationMenu /> */}
                 <UserNavigationMenu onTabChange={handleTabChange} />
               </Col>
               {/* Main content area */}
@@ -42,10 +44,6 @@ const UserDashboard = () => {
             </Row>
           </Container>
         </>
-      ) : (
-        <div>Unauthorized access</div>
-      )}
-    </>
   );
 };
 
