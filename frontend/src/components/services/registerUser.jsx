@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Container, Row, Col, Form, Button, Alert, InputGroup } from "react-bootstrap";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Alert,
+  InputGroup,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 
-import { getRedirectPathBasedOnRole, useAuth } from "../auth/AuthContext";
+// import { getRedirectPathBasedOnRole, useAuth } from "../auth/AuthContext";
 
 function SignUpPage() {
   const [categories, setCategories] = useState([]);
@@ -19,9 +27,15 @@ function SignUpPage() {
   const [userRole, setUserRole] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  //credentials
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [userId, setUserId] = useState("");
+  // const [token, setToken] = useState("");
+
   const navigate = useNavigate();
-    // Get the signin function from the context
-  const { signup } = useAuth();
+  // Get the signin function from the context
+  // const { signup } = useAuth();
 
   useEffect(() => {
     // Fetch categories from backend
@@ -72,26 +86,31 @@ function SignUpPage() {
       return;
     }
     try {
-      
-      await signup(username, email, password, userRole, selectedCategory);
-      
-      // console.log(user);
-      // const response = await axios.post(`http://localhost:5000/register`, newUser);
-      // console.log(response);
+      const newUser = {
+        user_name: username,
+        email: email,
+        password: password,
+        user_role: userRole,
+        category: selectedCategory,
+      };
+      const response = await axios.post(`http://localhost:5000/register`, newUser);
+      console.log(response);
       setSuccess("You have signed up successfully!"); // Set success message
-      navigate('/login'); //redirect to login page
+      navigate("/login"); //redirect to login page
     } catch (error) {
       console.error("Error occured: ", error.response.data.message);
       setError(`${error.response.data.message}. Please try again.`); // Set error message
       setTimeout(() => {
-        setError('')
+        setError("");
       }, 1500);
     }
   };
 
   return (
     <>
-      <Container fluid className="d-flex flex-column vh-100 align-items-center justify-content-center"
+      <Container
+        fluid
+        className="d-flex flex-column vh-100 align-items-center justify-content-center"
       >
         <Row className="align-items-center h-50">
           <Col md={8} className="text-start py-5 me-3">
@@ -128,19 +147,19 @@ function SignUpPage() {
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={handlePassword}
-                  placeholder="Enter password"
-                />
-                <Button variant="outline-secondary" onClick={togglePassword}>
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </Button>
-              </InputGroup>
-            </Form.Group>
+                <Form.Label>Password</Form.Label>
+                <InputGroup>
+                  <Form.Control
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={handlePassword}
+                    placeholder="Enter password"
+                  />
+                  <Button variant="outline-secondary" onClick={togglePassword}>
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </Button>
+                </InputGroup>
+              </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label>Role</Form.Label>
                 <Form.Select

@@ -123,7 +123,7 @@ const UnassignedIssues = () => {
                       size="sm"
                       onClick={() =>
                         navigate(
-                          `/maintenance/dashboard/assign-issues/${issue._id}`,
+                          `/maintenance-dashboard/assign-issues/${issue._id}`,
                           { state: { issue } }
                         )
                       }

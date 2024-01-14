@@ -200,7 +200,7 @@ function Assignments() {
                   size="sm"
                   onClick={() =>
                     navigate(
-                      `/maintenance/dashboard/assignments/${assignment._id}`,
+                      `/maintenance-dashboard/assignments/${assignment._id}`,
                       { state: { assignment } }
                     )
                   }

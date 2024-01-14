@@ -81,7 +81,7 @@ const MyAssignments = () => {
                   size="sm"
                   onClick={() =>
                     navigate(
-                      `/technicians/dashboard/assignment-details/${assignment._id}`,
+                      `/technicians-dashboard/assignment-details/${assignment._id}`,
                       { state: { assignment } }
                     )
                   }

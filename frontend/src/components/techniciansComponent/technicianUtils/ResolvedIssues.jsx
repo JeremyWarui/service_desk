@@ -87,7 +87,7 @@ const ResolvedAssignments = () => {
                   variant="primary"
                   onClick={() =>
                     navigate(
-                      `/technicians/dashboard/resolved-details/${assignment._id}`,
+                      `/technicians-dashboard/resolved-details/${assignment._id}`,
                       { state: { assignment } }
                     )
                   }

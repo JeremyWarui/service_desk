@@ -40,7 +40,7 @@ const ReportIssueForm = () => {
       });
       setSuccess("Successfully submitted your issue!");
       setTimeout(() => {
-        navigate("/users/dashboard/my-issues"); 
+        navigate("/users-dashboard/my-issues"); 
       }, 1000);
       // Redirect to myIssues after successful submission
     } catch (error) {

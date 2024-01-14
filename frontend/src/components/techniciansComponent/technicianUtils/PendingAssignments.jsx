@@ -115,7 +115,7 @@ const PendingAssignments = () => {
                   size="sm"
                   onClick={() =>
                     navigate(
-                      `/technicians/dashboard/assignments-details/${assignment._id}`,
+                      `/technicians-dashboard/assignments-details/${assignment._id}`,
                       { state: { assignment } }
                     )
                   }

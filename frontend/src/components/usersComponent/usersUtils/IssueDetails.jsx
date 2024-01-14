@@ -35,7 +35,7 @@ const IssueDetails = () => { // Remove match prop
       await axios.patch(`http://localhost:5000/issues/${id}`, { // Use id from params
         issue_message: newIssueMessage,
       });
-      navigate("users/dashboard/my-issues");
+      navigate("/users-dashboard/my-issues");
     } catch (error) {
       // Handle update error
       console.error(error);
@@ -43,7 +43,7 @@ const IssueDetails = () => { // Remove match prop
     }
   };
   function handleClick() {
-    navigate("/users/dashboard/my-issues");
+    navigate("/users-dashboard/my-issues");
   }
 
   return (

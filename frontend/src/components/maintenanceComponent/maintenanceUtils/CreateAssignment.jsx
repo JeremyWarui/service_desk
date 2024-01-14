@@ -81,7 +81,7 @@ const CreateAssignment = () => {
       setSuccess("Issue updated successfully!"); // Set success message
       // Redirect to dashboard after 3 seconds
       setTimeout(() => {
-        navigate("/maintenance/dashboard/issues");
+        navigate("/maintenance-dashboard/issues");
       }, 1000);
     } catch (error) {
       console.error("Error updating issue:", error);

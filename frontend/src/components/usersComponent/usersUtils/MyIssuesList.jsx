@@ -85,7 +85,7 @@ const MyIssues = () => {
               <td>
               <Button variant="primary" size="sm" onClick={() => {
                 console.log(issue.issue_message);
-                navigate(`/users/dashboard/issue-details/${issue._id}`)}
+                navigate(`/users-dashboard/issue-details/${issue._id}`)}
               }>
                 View Details
               </Button>
