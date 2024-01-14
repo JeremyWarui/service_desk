@@ -2,10 +2,12 @@ import React, { useState, useEffect, useContext } from "react";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Container, Row, Col, Form, Button, Alert, InputGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
-// import Cookies from 'js-cookie';
+import axios from "axios";
+import Cookies from 'js-cookie';
 
-import { getRedirectPathBasedOnRole, useAuth } from "../auth/AuthContext";
+// import { getRedirectPathBasedOnRole, useAuth } from "../auth/AuthContext";
+//we shall look into how our userDashboard was able to 
+// to perform auth context on hard code
 
 function LoginPage() {
   const [success, setSuccess] = useState("");
@@ -13,7 +15,12 @@ function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { login, userRole } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [userRole, setUserRole] = useState("");
+  const [token, setToken] = useState("");
+  // const [loading, setLoading] = useState(false); 
+  // const { login, userRole } = useAuth();
   const navigate = useNavigate();
 
 // Define a function to toggle the password visibility
@@ -21,45 +28,32 @@ function LoginPage() {
       setShowPassword(!showPassword);
     };
 
+  const getRedirectPathBasedOnRole = (userRole) => {
+    const paths = {
+      maintenance_officer: "/maintenance-dashboard/",
+      user: "/users-dashboard/",
+      technician: "/technicians-dashboard/",
+      admin: "/",
+    };
+    console.log(userRole);
+    return (paths[userRole] ?  paths[userRole] : "/login"); // Handle unknown roles
+};
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     // Handle form submission logic here
-    try {
-      await login(username, password);
-      console.log("Updated userRole:", userRole);
-      
-      //redirect based on roles
-      console.log(userRole);
-      const redirectPath = getRedirectPathBasedOnRole(userRole);
-      console.log("Redirecting to:", redirectPath);
-      setSuccess("Success!!"); // Set success message
-      setTimeout(() => {
-        setSuccess('')
-      }, 3000);
-      navigate(redirectPath);
-    } catch (error) {
-      console.error("Error occured: ", error.response.data.message);
-      setError(`${error.response.data.message}. Please try again.`); // Set error message
-      setTimeout(() => {
-        setError('')
-      }, 3000);
-    }
     // try {
-    //   const user = {
-    //     user_name: username,
-    //     password: password,
-    //   };
-    //   const response = await axios.post(`http://localhost:5000/connect`, user);
-    //   const token = response.data.token;
-    //   Cookies.set('token', token);
-    //   // console.log(response);
+    //   await login(username, password);
+    //   console.log("Updated userRole:", userRole);
+      
+    //   //redirect based on roles
+    //   console.log(userRole);
+    //   const redirectPath = getRedirectPathBasedOnRole(userRole);
+    //   console.log("Redirecting to:", redirectPath);
     //   setSuccess("Success!!"); // Set success message
-    //   setIsAuthenticated(true);
-    //   setUserRole(response.data.user.user_role);
-    //   const userId = response.data.user._id;
-    //   await fetchUserRole(userId);
-    //   setToken(token);
-    //   const redirectPath = getRedirectPathBasedOnRole(response.data.user.user_role);
+    //   setTimeout(() => {
+    //     setSuccess('')
+    //   }, 3000);
     //   navigate(redirectPath);
     // } catch (error) {
     //   console.error("Error occured: ", error.response.data.message);
@@ -67,8 +61,37 @@ function LoginPage() {
     //   setTimeout(() => {
     //     setError('')
     //   }, 3000);
-    // } finally {
     // }
+    try {
+      const user = {
+        user_name: username,
+        password: password,
+      };
+      const response = await axios.post(`http://localhost:5000/connect`, user);
+      const token = response.data.token;
+      Cookies.set('token', token);
+      // console.log(response);
+      setSuccess("Success!!"); // Set success message
+      const userId = response.data.user._id;
+      const userRole = response.data.user.user_role;
+      setIsAuthenticated(true);
+      setUserId(userId);
+      setUserRole(userRole);
+      setToken(token);
+      setSuccess("Success!!"); // Set success message
+      setTimeout(() => {
+        setSuccess('')
+      }, 3000);
+      const redirectPath = getRedirectPathBasedOnRole(userRole);
+      navigate(redirectPath);
+    } catch (error) {
+      console.error("Error occured: ", error.response.data.message);
+      setError(`${error.response.data.message}. Please try again.`); // Set error message
+      setTimeout(() => {
+        setError('')
+      }, 3000);
+    } finally {
+    }
   };
 
   return (
