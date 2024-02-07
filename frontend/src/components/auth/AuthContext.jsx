@@ -1,146 +1,91 @@
-// // authContext.jsx
-// import React, { createContext, useState, useEffect, useContext } from "react";
-// import { useNavigate } from "react-router-dom";
-// import axios from "axios";
-// import Cookies from "js-cookie";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
 
-// // Create a new context object
-// export const AuthContext = createContext();
+const AuthContext = createContext();
 
-// export const useAuth = () => {
-//   return useContext(AuthContext);
-// };
+export const useAuth = () => useContext(AuthContext);
 
-// export const getRedirectPathBasedOnRole = (userRole) => {
-//   const paths = {
-//     maintenance_officer: "/maintenance-dashboard/*",
-//     user: "/users-dashboard/",
-//     technician: "/technicians-dashboard/*",
-//     admin: "/",
-//   };
-//   console.log(userRole);
-//   return (paths[userRole] ?  paths[userRole] : "/login"); // Handle unknown roles
-// };
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState("");
 
-// export const AuthProvider = ({ children }) => {
-//   // Define the state and functions related to authentication
-//   const [isAuthenticated, setIsAuthenticated] = useState(false);
-//   const [userRole, setUserRole] = useState("");
-//   const [token, setToken] = useState("");
-//   const [loading, setLoading] = useState(false); 
-//   // const navigate = useNavigate();
+  const login = async (user_name, password) => {
+    // Assuming you have an API endpoint for authentication
+    try {
+      const response = await axios.post("http://localhost:5000/connect", {
+        user_name,
+        password,
+      });
+      // console.log(response);
+      if (
+        response.data &&
+        response.data.user._id &&
+        response.data.user.user_role &&
+        response.data.token
+      ) {
+        const { user, token } = response.data;
 
-//   const signup = async (name, email, password, role, category) => {
-//     // Handle the sign up logic here
-//     try {
-//       const newUser = {
-//         user_name: name,
-//         email: email,
-//         password: password,
-//         user_role: role,
-//         category: category,
-//       };
-//       const response = await axios.post(
-//         `http://localhost:5000/register`,
-//         newUser
-//       );
-//       console.log(response);
-//       // Set the state values accordingly
-//       // setIsAuthenticated(true);
-//       setUserRole(response.data.user.user_role);
-//       // setToken(token);
-//       return response.data.user;
-//     } catch (error) {
-//       console.error("Error signing up: ", error);
-//       throw error;
-//     }
-//   };
+        // Set user information in the context
+        setUser(user);
+        setToken(token);
+        console.log(token);
+        var now = new Date();
+        var expireTime = now.getTime() + 20 * 60 * 1000; // 20 minutes in milliseconds
+        now.setTime(expireTime);
 
-//   const login = async (username, password) => {
-//     // Handle the login logic here
-//     try {
-//       const user = {
-//         user_name: username,
-//         password: password,
-//       };
-//       const response = await axios.post(`http://localhost:5000/connect`, user);
-//       const token = response.data.token;
-//       console.log(token);
-//       const role = response.data.user.user_role;
-//       console.log(role);
-//       console.log(response.data.user.user_role);
-//       Cookies.set("token", token);
-//       console.log(Cookies.get('token'));
-//       console.log("before set user role:", userRole);
-//       // Set the state values accordingly
-//       verifyToken();
-//       setIsAuthenticated(true);
-//       setUserRole(role); //retrieve user role
-//       console.log("after set user role:", response);
-//       setToken(token);
-//     } catch (error) {
-//       console.error("Error logging in: ", error);
-//     }
-//   };
+        Cookies.set("token", token, {
+        // httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        expires: now,
+      });
+        return { user, token };
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (error) {
+      console.log(error);
+      throw new Error("Authentication failed");
+    }
+  };
 
-//   const logout = () => {
-//     // Handle the logout logic here
-//     // Clear the state values and the cookie accordingly
-//     setIsAuthenticated(false);
-//     setUserRole("");
-//     setToken("");
-//     Cookies.remove("token");
-//   };
-  
-//   const verifyToken = async (token) => {
-//     // const token = Cookies.get("token");
+  const logout = () => {
+    // Clear the token from cookies
+    Cookies.remove("token");
+    // Clear the user and token from the context
+    setUser(null);
+    setToken("");
+  };
 
-//     if (token) {
-//       setLoading(true);
-//       try {
-//         Cookies.set("token", token);
-//         const response = await axios.get(`http://localhost:5000/me`, {
-//           headers: { Authorization: `Bearer ${token}` },
-//         });
-//         console.log(response);
-//         setIsAuthenticated(true);
-//         setUserRole(response.data.user_role);
-        
-//         setToken(token);
+  useEffect(() => {
+    // Get the token from cookies
+    const token = Cookies.get("token");
+    console.log("Token from cookies: ", token);
+    // If the token exists, use it to get the user data
+    if (token) {
+      // Assuming you have an API endpoint for getting the current user
+      axios.get("http://localhost:5000/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          // Set the user and token in the context
+          console.log(response);
+          setUser(response.data);
+          setToken(token);
+        })
+        .catch((error) => {
+          // Handle the error
+          console.log(error);
+        });
+      console.log("in then: token ", token);
+      console.log(user);
+    }
+  }, []);
 
-//       } catch (error) {
-//         console.error("Error verifying token:", error);
-//         // Handle token invalidity (clear state, redirect to login)
-//         setIsAuthenticated(false);
-//         setUserRole("");
-//         Cookies.remove("token");
-//         // navigate("/login");
-//       } finally {
-//         setLoading(false);
-//       }
-//     }
-//   };
-
-//   useEffect(() => {
-//     setLoading(true);
-//     const token = Cookies.get("token");
-//     // verifyToken();
-//     setToken(token);
-//     setLoading(false);
-//     setUserRole(userRole)
-//   }, [userRole]);
-
-//   // Define the value object to pass to the provider
-//   const value = {
-//     isAuthenticated,
-//     userRole,
-//     token,
-//     signup,
-//     login,
-//     logout,
-//     loading,
-//   };
-
-//   // Return the provider component with the value prop
-//   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-// };
+  return (
+    <AuthContext.Provider value={{ user, token, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

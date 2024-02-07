@@ -3,34 +3,37 @@ import axios from 'axios';
 import { Table, Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
-import { TechnicianContext } from '../techContext/AuthContext';
+import { useAuth } from "../../auth/AuthContext";
 
 const ResolvedAssignments = () => {
   const [assignments, setAssignments] = useState([]);
-  const [technicianId, setTechnicianId] = useState();
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { technician } = useContext(TechnicianContext);
-  const fetchAssignments = async () => {
-    try {
-      console.log("fetchassignments id: " ,technician._id);
-      const response = await axios.get(`http://localhost:5000/techAssignments/${technician._id}`);
-      const assignmentsData = response.data.assignments;
-      console.log(assignmentsData);
-      setAssignments(assignmentsData);
-    } catch (error) {
-      setError('Error fetching assignments. Please try again.');
-    } finally {
-      setLoading(false); // Set loading state to false after completion
-    }
-  };
+  const { user } = useAuth();
+
 
   useEffect(() => {
-    setLoading(true); // Set loading state to true initially
-    setTechnicianId(technician._id);
-    fetchAssignments();
-  }, [technicianId]);
+    setLoading(true);
+    const technicianId = user?._id;
+    // console.log(technicianId);
+    fetchAssignments(technicianId);
+  }, [user]);
+
+  const fetchAssignments = async (technicianId) => {
+    try {
+      console.log("fetchassignments id: " , technicianId);
+      const response = await axios.get(
+        `http://localhost:5000/techAssignments/${technicianId}`
+      );
+      const assignmentsData = response?.data.assignments;
+      setAssignments(assignmentsData);
+    } catch (error) {
+      setError("Error fetching assignments. Please refresh the page.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Define handleRetry function to clear error and refetch assignments
   const handleRetry = () => {
@@ -42,7 +45,7 @@ const ResolvedAssignments = () => {
   return (
     <div className="container">
       {loading && <p className="loading-message">Loading assignments...</p>}
-      {error && <div className="error-message">{error} <button onClick={() => handleRetry()}>Retry</button></div>}
+      {/* {error && <div className="error-message">{error} <button onClick={() => handleRetry()}>Retry</button></div>} */}
       <h1 className="py-4">Resolved Assignments</h1>
       <hr />
       <Table striped bordered hover responsive="md" className="table table-sm">

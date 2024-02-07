@@ -1,3 +1,4 @@
+"use strict"
 import { v4 as uuidv4 } from "uuid";
 import User from "../models/User";
 import dbService from "../services/dbService";
@@ -101,14 +102,15 @@ class UsersController {
 
   static async getMe(req, res) {
     try {
-      const token = req.headers.authorization?.split(" ")[1];
+      const token = (req.headers.authorization || "").split(" ")[1];
+      console.log(token);
       if (!token) {
         res.status(401).json({ error: "Unauthorized" });
         return;
       }
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
       console.log(decoded);                                                                    
-      const user = await User.findById(decoded.id);
+      const user = await User.findById(decoded.userId);
 
       if (!user) {
         res.status(404).json({ error: "User not found" });

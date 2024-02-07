@@ -3,7 +3,8 @@ import axios from 'axios';
 import { Table, Button, ButtonGroup, DropdownButton, Dropdown } from 'react-bootstrap';
 import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
-import { TechnicianContext } from '../techContext/AuthContext';
+// import { TechnicianContext } from '../techContext/AuthContext';
+import { useAuth } from '../../auth/AuthContext';
 
 const MyAssignments = () => {
   const [assignments, setAssignments] = useState([]);
@@ -13,13 +14,15 @@ const MyAssignments = () => {
   const [selectedSortOption, setSelectedSortOption] = useState('createdAt');
   const navigate = useNavigate();
 
-  const { technician } = useContext(TechnicianContext);
+  const { user } = useAuth();
+  const technician = user;
+  // console.log(technician);
 
   const fetchAssignments = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/techAssignments/${technician._id}`);
       const assignmentsData = response.data.assignments;
-      console.log(assignmentsData);
+      // console.log(assignmentsData);
       setAssignments(assignmentsData);
       setLoading(false);
     } catch (error) {

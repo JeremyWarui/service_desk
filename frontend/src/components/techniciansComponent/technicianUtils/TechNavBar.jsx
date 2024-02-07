@@ -9,11 +9,15 @@ import {
   FaCheck,
   FaCog,
 } from "react-icons/fa";
-import { Badge } from "react-bootstrap";
+import { Badge, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+
+// Import the useAuth hook from the authcontext
+import { useAuth } from "../../auth/AuthContext";
 
 const TechnicianNavigationMenu = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { logout } = useAuth();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -66,6 +70,10 @@ const TechnicianNavigationMenu = () => {
             <NavLink to="account-settings" className="nav-link my-2">
               <FaCog className="me-2" /> Account Settings
             </NavLink>
+            <NavLink className="d-flex">
+            {/* Logout button */}
+              <Button className="me-2" onClick={logout}>Logout</Button>
+          </NavLink>
           </nav>
           <hr />
         </div>

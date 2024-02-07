@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Table,
   Button,
@@ -9,49 +9,56 @@ import {
 } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
+import { useAuth } from "../../auth/AuthContext";
 
 const PendingAssignments = () => {
   const [assignments, setAssignments] = useState([]);
-  const [technicianId, setTechnicianId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [sortBy, setSortBy] = useState('due_date'); // Add sorting state
+  const [sortBy, setSortBy] = useState("due_date"); // Add sorting state
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
 
   useEffect(() => {
     setLoading(true);
-    const fetchedTechnicianId = "657c5a4e6bef093354653d28"; // Replace with actual retrieval
-    setTechnicianId(fetchedTechnicianId);
-    fetchAssignments();
-  }, [technicianId]);
+    const technicianId = user?._id;
+    // console.log(technicianId);
+    fetchAssignments(technicianId);
+  }, [user]);
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = async (technicianId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/techAssignments/${technicianId}`);
-      const assignmentsData = response.data.assignments;
+      const response = await axios.get(
+        `http://localhost:5000/techAssignments/${technicianId}`
+      );
+      const assignmentsData = response?.data.assignments;
       setAssignments(assignmentsData);
     } catch (error) {
-      setError('Error fetching assignments. Please refresh the page.');
+      setError("Error fetching assignments. Please refresh the page.");
     } finally {
       setLoading(false);
     }
   };
 
   const sortOptions = [
-    { value: 'due_date', label: 'Due Date' },
-    { value: 'priority', label: 'Priority' },
+    { value: "due_date", label: "Due Date" },
+    { value: "priority", label: "Priority" },
   ];
 
-  const filteredAssignments = assignments.filter(
-    (assignment) => assignment.status === "in-progress" || assignment.status === "pending"
-  ).sort((a, b) => {
-    if (sortBy === 'priority') {
-      return a.priority - b.priority;
-    } else if (sortBy === 'due_date') {
-      return new Date(b.deadline) - new Date(a.deadline);
-    }
-    return 0;
-  });
+  const filteredAssignments = assignments
+    .filter(
+      (assignment) =>
+        assignment.status === "in-progress" || assignment.status === "pending"
+    )
+    .sort((a, b) => {
+      if (sortBy === "priority") {
+        return a.priority - b.priority;
+      } else if (sortBy === "due_date") {
+        return new Date(b.deadline) - new Date(a.deadline);
+      }
+      return 0;
+    });
 
   return (
     <div className="container">
@@ -102,9 +109,13 @@ const PendingAssignments = () => {
                 {assignment.priority === 1 ? (
                   <span style={{ color: "red", fontWeight: "bold" }}>High</span>
                 ) : assignment.priority === 2 ? (
-                  <span style={{ color: "orange", fontWeight: "bold" }}>Medium</span>
+                  <span style={{ color: "orange", fontWeight: "bold" }}>
+                    Medium
+                  </span>
                 ) : (
-                  <span style={{ color: "green", fontWeight: "bold" }}>Low</span>
+                  <span style={{ color: "green", fontWeight: "bold" }}>
+                    Low
+                  </span>
                 )}
               </td>
               <td>{moment(assignment.deadline).format("DD/MM/YYYY")}</td>

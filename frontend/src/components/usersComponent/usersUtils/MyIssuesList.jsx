@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Table, Button, Form, Select } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { AuthContext }from "../userContext/AuthContext"; // Assuming your auth context path
+// import { AuthContext }from "../userContext/AuthContext"; // Assuming your auth context path
+import { useAuth } from "../../auth/AuthContext";
 
 import axios from "axios";
 import moment from "moment";
@@ -11,23 +12,26 @@ const MyIssues = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [availableCategories, setAvailableCategories] = useState([]);
   const navigate = useNavigate();
+  // console.log(user);
 
   // Retrieve user ID from context
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
+  // console.log(user);
+
   useEffect(() => {
     // Fetch available categories
     axios.get("http://localhost:5000/categories")
       .then((response) => setAvailableCategories(response.data.categories))
       .catch((error) => console.error(error));
 
-    fetchIssues(); // Fetch issues initially
-  }, []);
+    fetchIssues(user?._id); // Fetch issues initially
+  }, [user?._id]);
 
   const fetchIssues = async () => {
     const categoryId = selectedCategory;
 
     try {
-      const response = await axios.get(`http://localhost:5000/users/${user._id}/issues`);
+      const response = await axios.get(`http://localhost:5000/users/${user?._id}/issues`);
       const filteredIssues = categoryId
         ? response.data.issues.filter((issue) => issue.category._id === categoryId)
         : response.data.issues;

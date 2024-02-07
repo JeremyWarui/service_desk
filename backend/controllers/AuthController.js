@@ -27,7 +27,7 @@ class AuthController {
       const token = jwt.sign(
         { userId: user._id, user_role: user.user_role },
         secret,
-        { expiresIn: "1h" }
+        { expiresIn: "2m" } // Increase expiration to 24 hours
       );
 
       console.log({ user, token: token });
@@ -92,9 +92,9 @@ class AuthController {
     }
   }
 
-  static async isAuthenticated(req, res) {
+  static async isAuthenticated(req, res, next) {
     try {
-      const token = req.headers.authorization?.split(" ")[1];
+      const token = (req.headers.authorization || "").split(" ")[1];
       if (!token) res.status(401).json({ message: "Missing authorization token" });
 
       const decoded = jwt.verify(token, process.env.TOKEN_SECRET);

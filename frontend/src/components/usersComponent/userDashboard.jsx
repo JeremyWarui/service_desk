@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthContext } from "./userContext/AuthContext"; // Import AuthContext
+// import { AuthContext } from "./userContext/AuthContext"; // Import AuthContext
 
 // Import necessary components
 import ReportIssueForm from "./usersUtils/ReportNewIssue";
@@ -10,11 +10,17 @@ import AllIssues from "./usersUtils/AllIssues";
 import IssueDetails from "./usersUtils/IssueDetails";
 import UserNavigationMenu from "./usersUtils/UserNavigation";
 
+import { useAuth } from "../auth/AuthContext";
+
 // UserDashboard.js
 const UserDashboard = () => {
-  // const { userRole, token } = useAuth();
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useAuth();
   console.log(user);
+
+  // Use user information as needed
+  console.log("User ID:", user?._id);
+  console.log("User Role:", user?.user_role);
+
   const [activeTab, setActiveTab] = useState("all-issues");
   const handleTabChange = (newTab) => {
     setActiveTab(newTab);
@@ -23,6 +29,7 @@ const UserDashboard = () => {
 
   return (
     <>
+    {user && user.user_role === "user" ? (
       <Container fluid>
         <Row>
           {/* Navigation menu */}
@@ -40,7 +47,7 @@ const UserDashboard = () => {
                   </Col>
                 }
               />
-              <Route path="report-issue" element={<ReportIssueForm />} />
+              <Route path="report-issue" element={<ReportIssueForm user />} />
               <Route path="my-issues" element={<MyIssues />} />
               <Route path="all-issues" element={<AllIssues />} />
               <Route path="issue-details/:id" element={<IssueDetails />} />
@@ -48,6 +55,10 @@ const UserDashboard = () => {
           </Col>
         </Row>
       </Container>
+      ) : (
+        // Redirect to the login page if the user is not defined
+        <Navigate to="/login" />
+      )}
     </>
   );
 };

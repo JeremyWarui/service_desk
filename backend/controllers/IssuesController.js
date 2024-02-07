@@ -84,6 +84,7 @@ class IssuesController {
           { path: "user", select: "user_name" },
           { path: "category", select: "category_name" },
         ])
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean()
@@ -120,6 +121,7 @@ class IssuesController {
         .skip(skip)
         .limit(limit)
         .populate([{ path: "category", select: "category_name" }])
+        .sort({ createdAt: -1 })
         .lean()
         .exec();
 
@@ -284,6 +286,7 @@ class IssuesController {
       }
       const issues = await Issue.find({ user: userId })
         .populate([{ path: "category" }, { path: "user", select: "user_name" }])
+        .sort({ createdAt: -1 })
         .lean()
         .exec();
       return res.status(200).json({ issues });

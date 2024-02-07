@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Spinner, Card, Form, Button, Alert } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../userContext/AuthContext"; // Assuming your auth context path
+import { useAuth } from "../../auth/AuthContext";
 
 const ReportIssueForm = () => {
   const [categories, setCategories] = useState([]);
@@ -13,7 +12,7 @@ const ReportIssueForm = () => {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext); // Get user ID from context
+  const { user } = useAuth(); // Get user ID from context
  
   useEffect(() => {
     const fetchCategories = async () => {
@@ -32,6 +31,7 @@ const ReportIssueForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(user);
     try {
       await axios.post("http://localhost:5000/issues", {
         user: user._id, // Include user ID in the request

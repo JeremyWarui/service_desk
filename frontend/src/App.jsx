@@ -8,11 +8,11 @@ import Homepage from "./components/homepage";
 import SignUpPage from "./components/services/registerUser";
 import LoginPage from "./components/services/loginUser";
 
-import { TechnicianProvider } from "./components/techniciansComponent/techContext/AuthContext";
-import { AuthProvider } from "./components/usersComponent/userContext/AuthContext";
+// import { TechnicianProvider } from "./components/techniciansComponent/techContext/AuthContext";
+// import { AuthProvider } from "./components/usersComponent/userContext/AuthContext";
 
 // import ProtectedRoute from "./components/auth/ProtectedRoute";
-// import { AuthProvider } from "./components/auth/AuthContext";
+import { AuthProvider } from "./components/auth/AuthContext";
 // import Cookies from "js-cookie";
 
 // import { useAuth } from "./components/auth/AuthContext";
@@ -20,24 +20,32 @@ import { AuthProvider } from "./components/usersComponent/userContext/AuthContex
 
 function App() {
   return (
-    // <AuthProvider token={initialToken}>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/login"
+          element={
+            <AuthProvider>
+              <LoginPage />
+            </AuthProvider>
+          }
+        />
         <Route path="/signup" element={<SignUpPage />} />
         <Route
           path="/maintenance-dashboard/*"
-          element={<MaintenanceDashboard/>}
-        >
-          <Route index element={<MaintenanceDashboard />} />
-        </Route>
+          element={
+            <AuthProvider>
+              <MaintenanceDashboard />
+            </AuthProvider>
+          }
+        />
         <Route
           path="/technicians-dashboard/*"
           element={
-            <TechnicianProvider>
+            <AuthProvider>
               <TechnicianDashboard />
-            </TechnicianProvider>
+            </AuthProvider>
           }
         />
         <Route
@@ -50,7 +58,6 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
-    // </AuthProvider>
   );
 }
 

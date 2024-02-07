@@ -10,10 +10,13 @@ import {
   FaExclamationCircle,
   FaClipboardList,
 } from "react-icons/fa";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Button } from "react-bootstrap";
+// Import the useAuth hook from the authcontext
+import { useAuth } from "../../auth/AuthContext";
 
 const MaintenanceNavigationMenu = ({ onTabChange }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { logout } = useAuth();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -45,6 +48,11 @@ const MaintenanceNavigationMenu = ({ onTabChange }) => {
           <NavLink to="user-settings" className="nav-link mt-3">
             <FaUserCog className="me-2" /> Settings
           </NavLink>
+          <NavLink className="d-flex">
+            {/* Logout button */}
+              <Button className="me-2" onClick={logout}>Logout</Button>
+          </NavLink>
+
         </nav>
         </div>
       </div>

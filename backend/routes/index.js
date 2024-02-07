@@ -21,7 +21,7 @@ router.get("/users",
 UsersController.getUsers);
 router.get("/users", UsersController.getUsers);
 router.get("/users/:id", UsersController.getUser);
-router.get("/me", UsersController.getMe);
+router.get("/me", AuthController.isAuthenticated, UsersController.getMe);
 router.patch("/user/me", 
 // AuthController.isAuthenticated,
 UsersController.updateUser

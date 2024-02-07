@@ -1,13 +1,10 @@
 import React, { useState, useContext } from "react";
-import {
-  Container,
-  Row,
-  Col,
-} from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { Routes, Route, Navigate } from "react-router-dom";
 // import axios from "axios";
 
-import { TechnicianContext } from "./techContext/AuthContext";
+// import { TechnicianContext } from "./techContext/AuthContext";
+import { useAuth } from "../auth/AuthContext";
 
 import MyAssignments from "./technicianUtils/MyAssignments";
 import TechnicianNavigationMenu from "./technicianUtils/TechNavBar";
@@ -19,7 +16,14 @@ import ResolvedAssignmentDetails from "./technicianUtils/ViewResolved";
 // export const DataContext = React.createContext();
 
 const TechnicianDashboard = () => {
-  const { technician } = useContext(TechnicianContext);
+  // const { technician } = useContext(TechnicianContext);
+  const { user } = useAuth();
+  const technician = user;
+  // console.log(technician);
+
+  // Use user information as needed
+  console.log("User ID:", technician?._id);
+  console.log("User Role:", technician?.user_role);
 
   return (
     <>
@@ -56,7 +60,8 @@ const TechnicianDashboard = () => {
           </Row>
         </Container>
       ) : (
-        <div>Unauthorized access</div>
+        // Redirect to the login page if the user is not defined
+        <Navigate to="/login" />
       )}
     </>
   );

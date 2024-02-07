@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Table,Form,Button,Alert,Row,Col,Card,Spinner } from "react-bootstrap";
 import moment from "moment";
-import { TechnicianContext } from "../techContext/AuthContext";
+import { useAuth } from "../../auth/AuthContext";
 
 function UpdateMyAssignment() {
   const { id } = useParams();
@@ -12,7 +12,7 @@ function UpdateMyAssignment() {
   const [assignment, setAssignment] = useState(null);
   const [updatedAssignment, setUpdatedAssignment] = useState(null);
   const [message, setMessage] = useState("");
-  const { technician } = useContext(TechnicianContext);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchAssignment = async () => {
@@ -62,7 +62,7 @@ function UpdateMyAssignment() {
     <div className="container">
       <h1 className="py-4">Assignment Details</h1>
       <hr></hr>
-      {loading && <Spinner animation="border" role="status">Loading...</Spinner>}
+      {loading && <p className="loading-message">Loading ...</p>}
       {message && <Alert variant="info">{message}</Alert>}
       {assignment && (
         <>
@@ -160,7 +160,7 @@ function UpdateMyAssignment() {
                     value={updatedAssignment.resolved_date}
                     onChange={handleChange}
                   />
-                  {console.log(updatedAssignment.resolved_date)}
+                  {/* {console.log(updatedAssignment.resolved_date)} */}
                 </Form.Group>
               </Col>
             </Row>

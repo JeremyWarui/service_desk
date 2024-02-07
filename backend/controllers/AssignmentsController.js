@@ -21,12 +21,11 @@ class AssignmentsController {
       console.log("status: ", status);
       console.log("deadline: ", deadline);
       console.log("priority: ", priority);
-     
 
       // Change the category_id field to category
       const { category } = req.body;
-       console.log("category_id: ", category);
-      // if (!technician_id || !issue_id || !status || !priority || !category) 
+      console.log("category_id: ", category);
+      // if (!technician_id || !issue_id || !status || !priority || !category)
       if (!technician_id || !issue_id || !status || !priority || !category) {
         return res.status(400).json({ error: "Missing required fields" });
       }
@@ -52,12 +51,11 @@ class AssignmentsController {
 
       // Push the new assignment to the assignment_history of the issue
       issue.issue_status = status;
-      issue.assignment_history.push(
-        {
-          assigned_to: technician_id,
-          assigned_date: newAssignment.assigned_date
-        });
-      
+      issue.assignment_history.push({
+        assigned_to: technician_id,
+        assigned_date: newAssignment.assigned_date,
+      });
+
       await issue.save();
 
       // Save the new assignment to the database
@@ -65,7 +63,6 @@ class AssignmentsController {
       // Return a success response with the new assignment
       console.log("success: ", issue);
       return res.status(201).json({ newAssignment });
-      
     } catch (error) {
       console.log(error.message);
       return res.status(500).json({ error: error.message });
@@ -84,8 +81,13 @@ class AssignmentsController {
       const assignments = await Assignment.find({})
         .populate("user", "user_name")
         .populate("technician", "user_name")
-        .populate("issue", "issue_message issue_status createdAt")
+        .populate({
+          path: "issue",
+          select: "issue_message issue_status createdAt",
+          options: { sort: { createdAt: -1 } },
+        })
         .populate("category", "category_name")
+        .sort({assigned_date: -1})
         .exec();
       return res.status(200).json({ assignments });
     } catch (error) {
@@ -157,6 +159,7 @@ class AssignmentsController {
           { path: "category" },
           { path: "user", select: "user_name" },
         ])
+        .sort({ createdAt: -1 })
         .lean()
         .exec();
       console.log(assignments);
@@ -191,7 +194,7 @@ class AssignmentsController {
           issue.resolved_date = new Date(resolved_date);
           assignment.resolved_date = new Date(resolved_date);
         }
-        
+
         await issue.save();
       }
       if (priority) assignment.priority = priority;

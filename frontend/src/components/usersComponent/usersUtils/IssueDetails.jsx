@@ -17,7 +17,7 @@ const IssueDetails = () => { // Remove match prop
       try {
         const response = await axios.get(`http://localhost:5000/issues/${id}`); // Use id from params
         console.log(response.data);
-        setIssue(response.data.issue);
+        setIssue(response?.data.issue);
         setNewIssueMessage(response.data.issue.issue_message); // Initialize with current message
       } catch (error) {
         setError(error);
