@@ -83,7 +83,7 @@ class AssignmentsController {
         .populate("technician", "user_name")
         .populate({
           path: "issue",
-          select: "issue_message issue_status createdAt",
+          select: "issue_id issue_message issue_status createdAt",
           options: { sort: { createdAt: -1 } },
         })
         .populate("category", "category_name")
@@ -107,7 +107,7 @@ class AssignmentsController {
       const assignmentResult = await Assignment.findById(assignmentId)
         .populate("user", "user_name")
         .populate("technician", "user_name")
-        .populate("issue", "issue_message issue_status createdAt")
+        .populate("issue", "issue_id issue_message issue_status createdAt")
         .populate("category", "category_name")
         .exec();
 
@@ -116,6 +116,7 @@ class AssignmentsController {
 
       const assignment = {
         id: assignmentResult._id,
+        issue_id: assignmentResult.issue.issue_id,
         status: assignmentResult.status,
         priority: assignmentResult.priority,
         assigned_date: assignmentResult.assigned_date,
@@ -155,7 +156,7 @@ class AssignmentsController {
 
       const assignments = await Assignment.find({ technician: technicianId })
         .populate([
-          { path: "issue", select: "issue_message issue_status createdAt" },
+          { path: "issue", select: "issue_id issue_message issue_status createdAt" },
           { path: "category" },
           { path: "user", select: "user_name" },
         ])
@@ -200,6 +201,7 @@ class AssignmentsController {
       if (priority) assignment.priority = priority;
       if (deadline) assignment.deadline = deadline;
       if (messages) assignment.messages.push(...messages);
+      console.log(assignment);
 
       await assignment.save();
 

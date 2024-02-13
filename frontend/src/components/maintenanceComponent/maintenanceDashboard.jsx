@@ -54,12 +54,10 @@ const MaintenanceOfficerDashboard = () => {
                     </Col>
                   }
                 />
-                {/* <Route path="assign-issues" element={ <Col sm={10}> <CreateAssignment /> </Col> } /> */}
                 <Route
                   path="assign-issues/:id"
                   element={
                     <Col sm={10}>
-                      {" "}
                       <CreateAssignment />{" "}
                     </Col>
                   }
@@ -72,7 +70,6 @@ const MaintenanceOfficerDashboard = () => {
           </Row>
         </Container>
       ) : (
-        // Redirect to the login page if the user is not defined
         <Navigate to="/login" />
       )}
     </>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Form, FormControl, Select } from "react-bootstrap";
+import { Table, Button, Form, FormControl, Select, Row, Col } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import "./tablesStyles.css";
 const ViewAllIssues = () => {
   const [issues, setIssues] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,8 +52,11 @@ const ViewAllIssues = () => {
   
       const filteredIssues = updatedIssues.filter((issue) =>
         !selectedCategory || issue.category === selectedCategory
+      ).filter(
+        (issue) => !selectedStatus || issue.issue_status === selectedStatus
       );
       setIssues(filteredIssues.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      // console.log(issues);
       setCurrentPage(page);
       setPages(pages);
       setTotal(total);
@@ -64,13 +68,17 @@ const ViewAllIssues = () => {
   };
   
   useEffect(() => {
-    fetchIssues(currentPage, selectedCategory);
+    fetchIssues(currentPage, selectedCategory, selectedStatus);
     fetchCategories();
-  }, [selectedCategory, currentPage]); // Dependency array adjusted
+  }, [selectedCategory, currentPage, selectedStatus]); // Dependency array adjusted
   
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
     fetchIssues(currentPage, selectedCategory); // Fetch issues after category change
+  };
+
+  const handleStatusChange = (event) => {
+    setSelectedStatus(event.target.value);
   };
   
   const handlePageChange = (data) => {
@@ -83,24 +91,45 @@ const ViewAllIssues = () => {
   return (
     <>
       <div>
-        <h1 className="py-3">Requests</h1>
+        <h1 className="py-3">All Requests</h1>
          <Form className="mb-3">
-          <Form.Group controlId="filterCategory">
-            <Form.Label>Filter by Category:</Form.Label>
-            <Form.Control
+         <Row>
+          <Col md={4}>
+            <Form.Group controlId="filterCategory">
+              <Form.Label>Filter by Category:</Form.Label>
+              <Form.Control
+                  as="select"
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                >
+                  <option value="">Select Category</option>
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category._id} value={category.category_name}>
+                      {category.category_name}
+                    </option>
+                  ))}
+                </Form.Control>
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group controlId="filterStatus">
+              <Form.Label>Filter by Status:</Form.Label>
+              <Form.Control
                 as="select"
-                value={selectedCategory}
-                onChange={handleCategoryChange}
+                value={selectedStatus}
+                onChange={handleStatusChange}
               >
-                <option value="">Select Category</option>
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category.category_name}>
-                    {category.category_name}
-                  </option>
-                ))}
+                <option value="">Select Status</option>
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed">Resolved</option>
               </Form.Control>
-          </Form.Group>
+            </Form.Group>
+          </Col>
+        </Row>
+          
         </Form>       
         <hr></hr>
         { isLoading ? (
@@ -121,7 +150,7 @@ const ViewAllIssues = () => {
             <tbody>
               {issues.map((issue) => (
                 <tr key={issue._id}>
-                  <td>{issue._id}</td>
+                  <td>{issue.issue_id}</td>
                   <td>{issue.category}</td>
                   <td>{issue.issue_message}</td>
                   <td>{issue.issue_status}</td>

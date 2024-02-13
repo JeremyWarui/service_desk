@@ -70,7 +70,7 @@ function Assignments() {
             (assignment) =>
               !selectedCategory || assignment.category._id === selectedCategory
           );
-          console.log(allAssignments);
+          // console.log(allAssignments);
           const sortedAssignments = filteredAssignments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setAssignments(sortedAssignments);
       } catch (error) {
@@ -96,7 +96,7 @@ function Assignments() {
   // Return the JSX code to render the component
   return (
     <div className="container">
-      <h1 className="py-3">Tasks</h1>
+      <h1 className="py-3">Assigned Tasks</h1>
       <hr></hr>
       <Form className="mb-3">
         <Row>
@@ -154,7 +154,7 @@ function Assignments() {
           </Col>
         </Row>
       </Form>
-      <Table striped bordered hover responsive="md" className="table table-sm">
+      <Table striped bordered hover responsive="sm" className="table table-sm">
         <thead>
           <tr>
             <th>Issue ID</th>
@@ -173,7 +173,7 @@ function Assignments() {
         <tbody>
           {assignments.map((assignment) => (
             <tr key={assignment._id}>
-              <td>{assignment._id}</td>
+              <td>{assignment.issue.issue_id}</td>
               <td>{assignment.category.category_name}</td>
               <td>{assignment.issue.issue_message}</td>
               <td>{assignment.user.user_name}</td>

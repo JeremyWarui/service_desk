@@ -15,11 +15,9 @@ import { useAuth } from "../auth/AuthContext";
 // UserDashboard.js
 const UserDashboard = () => {
   const { user, logout } = useAuth();
-  console.log(user);
-
   // Use user information as needed
-  console.log("User ID:", user?._id);
-  console.log("User Role:", user?.user_role);
+  // console.log("User ID:", user?._id);
+  // console.log("User Role:", user?.user_role);
 
   const [activeTab, setActiveTab] = useState("all-issues");
   const handleTabChange = (newTab) => {

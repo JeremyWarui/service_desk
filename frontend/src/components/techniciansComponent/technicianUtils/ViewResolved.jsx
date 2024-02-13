@@ -9,7 +9,7 @@ const ResolvedAssignmentDetails = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { id } = useParams();
-  console.log(id);
+  // console.log(id);
 
   const fetchData = async () => {
     try {
@@ -47,7 +47,7 @@ const ResolvedAssignmentDetails = () => {
         <Row>
           <Col>
             <Card bg="light" border="primary" text="dark">
-              <Card.Header>Issue ID: {resolvedAssignment.id}</Card.Header>
+              <Card.Header>Issue ID: {resolvedAssignment.issue_id}</Card.Header>
               <Table striped bordered hover>
                 <thead>
                   <tr>

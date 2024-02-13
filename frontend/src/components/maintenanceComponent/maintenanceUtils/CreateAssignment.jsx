@@ -114,7 +114,7 @@ const CreateAssignment = () => {
           <Row>
             <Col>
               <Card bg="light" border="primary" text="dark">
-                <Card.Header>Issue ID: {issue._id}</Card.Header>
+                <Card.Header>Issue ID: {issue.issue_id}</Card.Header>
                 <Table striped bordered hover>
                   <thead>
                     <tr>

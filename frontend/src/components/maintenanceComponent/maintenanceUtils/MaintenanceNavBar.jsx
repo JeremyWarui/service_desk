@@ -31,16 +31,16 @@ const MaintenanceNavigationMenu = ({ onTabChange }) => {
         <div className="offcanvas-body">
         <nav className="nav flex-column mb-auto mt-5">
           <NavLink to="assignments" className="nav-link mt-3">
-            <FaWrench className="me-2" /> Tasks
+            <FaWrench className="me-2" /> Assigned Tasks
           </NavLink>
           <NavLink to="issues" className="nav-link mt-3">
-            <FaExclamationCircle className="me-2" /> Attention Needed
+            <FaExclamationCircle className="me-2" /> All Requests
           </NavLink>
           <NavLink to="not-assigned" className="nav-link mt-3">
-            <FaClipboardList className="me-2" /> Pending Action
+            <FaClipboardList className="me-2" /> Open Assignments
           </NavLink>
           <NavLink to="manage-categories" className="nav-link mt-3" aria-current="page">
-            <FaFilter className="me-2" /> Organize
+            <FaFilter className="me-2" /> Categories
           </NavLink>
           <NavLink to="reports" className="nav-link mt-3">
             <FaChartBar className="me-2" /> Insights

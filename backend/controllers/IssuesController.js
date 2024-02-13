@@ -15,7 +15,7 @@ class IssuesController {
           .json({ error: "Database connection unavailable." });
       }
       const { category, issue_message, user, issue_status = "open" } = req.body;
-
+  
       const validationErrors = [];
       if (!category) validationErrors.push("Missing category");
       if (!issue_message) validationErrors.push("Missing issue message");
@@ -29,29 +29,30 @@ class IssuesController {
       if (validationErrors.length > 0) {
         return res.status(400).json({ error: validationErrors.join(", ") });
       }
-
+  
       const foundUser = await User.findById(user);
       if (!foundUser) return res.status(404).json({ error: "User not found" });
-
+  
       const foundCategory = await Category.findById(category);
       if (!foundCategory)
         return res.status(404).json({ error: "Category not found" });
-
+  
       const newIssue = new Issue({
         category,
         issue_message,
         user,
         issue_status,
       });
-
-      await newIssue.save();
       console.log(newIssue);
-
+  
+      // Save the document to the database using async/await
+      const issue = await newIssue.save();
+      console.log(issue); // Log the saved document
       return res.status(201).json({
         issue: {
-          ...newIssue.toObject(),
-          user: await User.findById(newIssue.user),
-          category: await Category.findById(newIssue.category),
+          ...issue.toObject(),
+          user: await User.findById(issue.user),
+          category: await Category.findById(issue.category),
         },
       });
     } catch (error) {
@@ -59,6 +60,7 @@ class IssuesController {
       return res.status(500).json({ error: "Something went wrong" });
     }
   }
+  
 
   static async getAllIssues(req, res) {
     try {
@@ -149,6 +151,7 @@ class IssuesController {
       const issueId = req.params.id;
       const result = await Issue.findById(issueId, {
         _id: 1,
+        issue_id: 1,
         issue_message: 1,
         issue_status: 1,
         assignment_history: 1,
@@ -183,6 +186,7 @@ class IssuesController {
 
       const issue = {
         id: result._id,
+        issue_id: result.issue_id,
         issue: result,
         category: result.category.category_name,
         status: result.issue_status,
@@ -344,6 +348,7 @@ class IssuesController {
       return res.status(500).json({ error: "Something went wrong" });
     }
   }
+
 }
 
 export default IssuesController;

@@ -60,7 +60,7 @@ const MyAssignments = () => {
         <tbody>
           {assignments.map((assignment) => (
             <tr key={assignment._id}>
-              <td>{assignment._id}</td>
+              <td>{assignment.issue.issue_id}</td>
               {/* <td>{assignment.category.category_name}</td> */}
               <td>{assignment.issue.issue_message}</td>
               <td>{assignment.user.user_name}</td>

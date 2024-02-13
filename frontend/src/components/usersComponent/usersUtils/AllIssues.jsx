@@ -82,23 +82,23 @@ const AllIssues = () => {
           <Table className="table" striped bordered hover responsive>
             <thead>
               <tr>
+                <th>Issue ID</th>
                 <th>Issue</th>
                 <th>Category</th>
+                <th>Reported By</th>
                 <th>Status</th>
                 <th>Date Reported</th>
-                <th>Reported By</th>
-                <th>Issue ID</th>
               </tr>
             </thead>
             <tbody>
               {issues.map((issue) => (
                 <tr key={issue._id}>
+                  <td>{issue.issue_id}</td>
                   <td>{issue.issue_message}</td>
                   <td>{issue.category.category_name}</td>
+                  <td>{issue.user.user_name}</td>
                   <td>{issue.issue_status}</td>
                   <td>{moment(issue.createdAt).format("DD/MM/YYYY")}</td>
-                  <td>{issue.user.user_name}</td>
-                  <td>{issue._id}</td>
                 </tr>
               ))}
             </tbody>

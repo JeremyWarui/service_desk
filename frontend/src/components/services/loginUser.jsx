@@ -1,18 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import {
-  Container,
-  Row,
-  Col,
-  Form,
-  Button,
-  Alert,
-  InputGroup,
-} from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Container, Row, Col, Form, Button, Alert, InputGroup } from "react-bootstrap";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import axios from "axios";
-import Cookies from "js-cookie";
 
 function LoginPage() {
   const [success, setSuccess] = useState("");
@@ -122,6 +112,9 @@ function LoginPage() {
             <Button className="w-100" type="submit">
               Login
             </Button>
+            <Link to="/signup" className="w-100">
+              <Button className="w-100 mt-3">Sign Up</Button>
+            </Link>
           </Form>
         </Col>
       </Row>

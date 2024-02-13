@@ -81,7 +81,7 @@ const MyIssues = () => {
         <tbody>
           {issues.map((issue) => (
             <tr key={issue._id}>
-              <td>{issue._id}</td>
+              <td>{issue.issue_id}</td>
               <td>{issue.issue_message}</td>
               <td>{issue.category.category_name}</td>
               <td>{issue.issue_status}</td>

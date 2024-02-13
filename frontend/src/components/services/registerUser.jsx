@@ -1,19 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import {
-  Container,
-  Row,
-  Col,
-  Form,
-  Button,
-  Alert,
-  InputGroup,
-} from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-
+import { Container, Row, Col, Form, Button, Alert, InputGroup} from "react-bootstrap";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-
-// import { getRedirectPathBasedOnRole, useAuth } from "../auth/AuthContext";
 
 function SignUpPage() {
   const [categories, setCategories] = useState([]);
@@ -28,15 +17,7 @@ function SignUpPage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  //credentials
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // const [userId, setUserId] = useState("");
-  // const [token, setToken] = useState("");
-
   const navigate = useNavigate();
-  // Get the signin function from the context
-  // const { signup } = useAuth();
-
   useEffect(() => {
     // Fetch categories from backend
     const fetchCategories = async () => {
@@ -199,6 +180,10 @@ function SignUpPage() {
               <Button className="w-100" type="submit">
                 Sign Up
               </Button>
+              <Link to="/login" className="w-100">
+                <p className="mt-3">Already have an account?</p>
+                <Button className="w-100">Log In</Button>
+              </Link>
             </Form>
           </Col>
         </Row>

@@ -1,11 +1,8 @@
 import React, { useState, useContext } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { Routes, Route, Navigate } from "react-router-dom";
-// import axios from "axios";
 
-// import { TechnicianContext } from "./techContext/AuthContext";
 import { useAuth } from "../auth/AuthContext";
-
 import MyAssignments from "./technicianUtils/MyAssignments";
 import TechnicianNavigationMenu from "./technicianUtils/TechNavBar";
 import UpdateAssignments from "./technicianUtils/UpdateMyAssignment";
@@ -22,8 +19,8 @@ const TechnicianDashboard = () => {
   // console.log(technician);
 
   // Use user information as needed
-  console.log("User ID:", technician?._id);
-  console.log("User Role:", technician?.user_role);
+  // console.log("User ID:", technician?._id);
+  // console.log("User Role:", technician?.user_role);
 
   return (
     <>

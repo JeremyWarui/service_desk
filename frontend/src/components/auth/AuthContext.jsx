@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
         // Set user information in the context
         setUser(user);
         setToken(token);
-        console.log(token);
+        // console.log(token);
         var now = new Date();
         var expireTime = now.getTime() + 20 * 60 * 1000; // 20 minutes in milliseconds
         now.setTime(expireTime);
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Get the token from cookies
     const token = Cookies.get("token");
-    console.log("Token from cookies: ", token);
+    // console.log("Token from cookies: ", token);
     // If the token exists, use it to get the user data
     if (token) {
       // Assuming you have an API endpoint for getting the current user
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
         })
         .then((response) => {
           // Set the user and token in the context
-          console.log(response);
+          // console.log(response);
           setUser(response.data);
           setToken(token);
         })
@@ -78,8 +78,8 @@ export const AuthProvider = ({ children }) => {
           // Handle the error
           console.log(error);
         });
-      console.log("in then: token ", token);
-      console.log(user);
+      // console.log("in then: token ", token);
+      // console.log(user);
     }
   }, []);
 

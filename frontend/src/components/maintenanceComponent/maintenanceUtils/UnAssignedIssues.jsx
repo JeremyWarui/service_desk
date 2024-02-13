@@ -80,7 +80,7 @@ const UnassignedIssues = () => {
   return (
     <>
       <div className="container">
-        <h1 className="my-3">Pending Action</h1>
+        <h1 className="my-3">Open Assignments</h1>
 
         <Form className="mb-3">
           <Form.Group controlId="filterCategory">
@@ -128,7 +128,7 @@ const UnassignedIssues = () => {
             <tbody>
               {issues.map((issue) => (
                 <tr key={issue._id}>
-                  <td>{issue._id}</td>
+                  <td>{issue.issue_id}</td>
                   <td>{issue.category}</td>
                   <td>{issue.issue_message}</td>
                   <td>{issue.issue_status}</td>

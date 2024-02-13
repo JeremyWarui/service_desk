@@ -60,7 +60,7 @@ const IssueDetails = () => { // Remove match prop
               <tbody>
                 <tr>
                   <td>Issue ID</td>
-                  <td>{issue.id}</td>
+                  <td>{issue.issue_id}</td>
                 </tr>
                 <tr>
                   <td>Category</td>

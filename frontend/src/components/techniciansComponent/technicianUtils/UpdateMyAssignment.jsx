@@ -49,7 +49,7 @@ function UpdateMyAssignment() {
         `http://localhost:5000/techAssignments/${id}`,
         updatedAssignment
       );
-      console.log(updatedAssignment);
+      // console.log(updatedAssignment);
       setMessage("Assignment updated successfully!");
       navigate(-1); // Navigate back
     } catch (error) {
@@ -82,7 +82,7 @@ function UpdateMyAssignment() {
             </thead>
             <tbody>
               <tr>
-                <td>{assignment.id}</td>
+                <td>{assignment.issue_id}</td>
                 <td>{assignment.issue}</td>
                 <td>{assignment.raiseeName}</td>
                 <td>{moment(assignment.reportedDate).format("DD/MM/YYYY")}</td>
