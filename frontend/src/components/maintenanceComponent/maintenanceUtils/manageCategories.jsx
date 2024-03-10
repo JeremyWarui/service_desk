@@ -11,7 +11,7 @@ const ManageCategories = () => {
     // Fetch categories from your data source
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/categories"); // Replace with your API endpoint
+        const response = await axios.get("/api/categories"); // Replace with your API endpoint
         const data = response.data;
         console.log(data);
         // Set categories state to the categories array inside the data object, not the whole data object
@@ -29,7 +29,7 @@ const ManageCategories = () => {
   const createCategory = async () => {
     // Send request to create a new category
     try {
-      const response = await axios.post("http://localhost:5000/categories", {
+      const response = await axios.post("/api/categories", {
         name: newCategoryName,
       });
       const newCategory = response.data;

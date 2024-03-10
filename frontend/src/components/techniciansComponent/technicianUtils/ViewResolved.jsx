@@ -14,7 +14,7 @@ const ResolvedAssignmentDetails = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/assignments/${id}`);
+      const response = await axios.get(`/api/assignments/${id}`);
       setResolvedAssignment(response.data.assignment);
     } catch (error) {
       setError("Error fetching assignment details. Please try again.");

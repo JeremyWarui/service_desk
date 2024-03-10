@@ -15,7 +15,7 @@ const IssueDetails = () => { // Remove match prop
   useEffect(() => {
     const fetchIssue = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/issues/${id}`); // Use id from params
+        const response = await axios.get(`/api/issues/${id}`); // Use id from params
         console.log(response.data);
         setIssue(response?.data.issue);
         setNewIssueMessage(response.data.issue.issue_message); // Initialize with current message
@@ -32,7 +32,7 @@ const IssueDetails = () => { // Remove match prop
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.patch(`http://localhost:5000/issues/${id}`, { // Use id from params
+      await axios.patch(`/api/issues/${id}`, { // Use id from params
         issue_message: newIssueMessage,
       });
       navigate("/users-dashboard/my-issues");

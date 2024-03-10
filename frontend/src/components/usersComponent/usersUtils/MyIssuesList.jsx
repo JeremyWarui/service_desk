@@ -20,7 +20,7 @@ const MyIssues = () => {
 
   useEffect(() => {
     // Fetch available categories
-    axios.get("http://localhost:5000/categories")
+    axios.get("/api/categories")
       .then((response) => setAvailableCategories(response.data.categories))
       .catch((error) => console.error(error));
 
@@ -31,7 +31,7 @@ const MyIssues = () => {
     const categoryId = selectedCategory;
 
     try {
-      const response = await axios.get(`http://localhost:5000/users/${user?._id}/issues`);
+      const response = await axios.get(`/api/users/${user?._id}/issues`);
       const filteredIssues = categoryId
         ? response.data.issues.filter((issue) => issue.category._id === categoryId)
         : response.data.issues;

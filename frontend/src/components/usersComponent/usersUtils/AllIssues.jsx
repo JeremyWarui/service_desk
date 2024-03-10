@@ -17,7 +17,7 @@ const AllIssues = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/categories")
+      .get("/api/categories")
       .then((response) => setAvailableCategories(response.data.categories))
       .catch((error) => console.error(error));
     fetchIssues(currentPage, selectedCategory);
@@ -27,7 +27,7 @@ const AllIssues = () => {
     const categoryId = category;
     try {
       setIsLoading(true);
-      const response = await axios.get(`http://localhost:5000/issues?page=${page}`);
+      const response = await axios.get(`/api/issues?page=${page}`);
       const { issues, page: currentPage, pages, total } = response.data;
       const filteredIssues = categoryId
         ? issues.filter((issue) => issue.category._id === categoryId)

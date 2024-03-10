@@ -19,7 +19,7 @@ const ViewAllIssues = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/categories");
+      const response = await axios.get("/api/categories");
       const categories = response.data.categories;
       setCategories(categories);
     } catch (error) {
@@ -30,15 +30,15 @@ const ViewAllIssues = () => {
   const fetchIssues = async (page, category) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/issues?page=${page}`);
+      const response = await axios.get(`/api/issues?page=${page}`);
       const { issues, page: currentPage, pages, total } = response.data;
   
       // Fetch category and technician data concurrently
       const promises = issues.map((issue) =>
         Promise.all([
-          axios.get(`http://localhost:5000/categories/${issue.category._id}`),
+          axios.get(`/api/categories/${issue.category._id}`),
           issue.assignment_history && issue.assignment_history[0]
-            ? axios.get(`http://localhost:5000/users/${issue.assignment_history[0].assigned_to}`)
+            ? axios.get(`/api/users/${issue.assignment_history[0].assigned_to}`)
             : Promise.resolve(null),
         ])
       );

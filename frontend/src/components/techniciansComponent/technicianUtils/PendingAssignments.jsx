@@ -29,9 +29,7 @@ const PendingAssignments = () => {
 
   const fetchAssignments = async (technicianId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/techAssignments/${technicianId}`
-      );
+      const response = await axios.get(`/api/techAssignments/${technicianId}`);
       const assignmentsData = response?.data.assignments;
       setAssignments(assignmentsData);
     } catch (error) {

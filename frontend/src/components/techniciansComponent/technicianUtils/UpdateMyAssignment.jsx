@@ -17,9 +17,7 @@ function UpdateMyAssignment() {
   useEffect(() => {
     const fetchAssignment = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/assignments/${id}`
-        );
+        const response = await axios.get(`/api/assignments/${id}`);
         const assignment = response.data.assignment;
         console.log(assignment);
         setAssignment(assignment);
@@ -45,8 +43,7 @@ function UpdateMyAssignment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.patch(
-        `http://localhost:5000/techAssignments/${id}`,
+      const response = await axios.patch(`/api/techAssignments/${id}`,
         updatedAssignment
       );
       // console.log(updatedAssignment);

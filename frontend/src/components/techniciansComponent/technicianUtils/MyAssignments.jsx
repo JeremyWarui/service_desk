@@ -20,7 +20,7 @@ const MyAssignments = () => {
 
   const fetchAssignments = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/techAssignments/${technician._id}`);
+      const response = await axios.get(`/api/techAssignments/${technician._id}`);
       const assignmentsData = response.data.assignments;
       // console.log(assignmentsData);
       setAssignments(assignmentsData);

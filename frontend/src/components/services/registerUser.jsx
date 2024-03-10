@@ -23,7 +23,7 @@ function SignUpPage() {
     const fetchCategories = async () => {
       setIsLoading(true);
       try {
-        const response = await axios("http://localhost:5000/categories");
+        const response = await axios("/api/categories");
         const data = await response.data.categories;
         // console.log(data);
         setCategories(data);
@@ -74,7 +74,7 @@ function SignUpPage() {
         user_role: userRole,
         category: selectedCategory,
       };
-      const response = await axios.post(`http://localhost:5000/register`, newUser);
+      const response = await axios.post(`/api/register`, newUser);
       console.log(response);
       setSuccess("You have signed up successfully!"); // Set success message
       navigate("/login"); //redirect to login page

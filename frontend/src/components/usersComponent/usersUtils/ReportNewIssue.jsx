@@ -17,7 +17,7 @@ const ReportIssueForm = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/categories");
+        const response = await axios.get("/api/categories");
         setCategories(response.data.categories);
       } catch (error) {
         setError(error);
@@ -33,7 +33,7 @@ const ReportIssueForm = () => {
     e.preventDefault();
     console.log(user);
     try {
-      await axios.post("http://localhost:5000/issues", {
+      await axios.post("/api/issues", {
         user: user._id, // Include user ID in the request
         category: selectedCategory,
         issue_message: issueMessage,

@@ -19,7 +19,7 @@ const UnassignedIssues = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/categories");
+      const response = await axios.get("/api/categories");
       const categories = response.data.categories;
       setCategories(categories);
     } catch (error) {
@@ -31,14 +31,12 @@ const UnassignedIssues = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.get(
-        `http://localhost:5000/open-issues`
-      );
+      const response = await axios.get(`/api/open-issues`);
       const { issues: unassignedIssues, page: currentPage, pages, total } = response.data;
 
       // Fetch category data concurrently
       const promises = unassignedIssues.map((issue) =>
-        axios.get(`http://localhost:5000/categories/${issue.category._id}`)
+        axios.get(`/api/categories/${issue.category._id}`)
       );
       const categories = await Promise.all(promises);
 

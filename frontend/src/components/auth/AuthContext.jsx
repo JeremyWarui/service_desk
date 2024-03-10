@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (user_name, password) => {
     // Assuming you have an API endpoint for authentication
     try {
-      const response = await axios.post("http://localhost:5000/connect", {
+      const response = await axios.post("/api/connect", {
         user_name,
         password,
       });
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     // If the token exists, use it to get the user data
     if (token) {
       // Assuming you have an API endpoint for getting the current user
-      axios.get("http://localhost:5000/me", {
+      axios.get("/api/me", {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {

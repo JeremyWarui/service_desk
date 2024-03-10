@@ -25,7 +25,7 @@ const CreateAssignment = () => {
       try {
         const issue = location.state.issue;
         setIssue(issue);
-        const response = await axios.get(`http://localhost:5000/issues/${issue._id}`);
+        const response = await axios.get(`/api/issues/${issue._id}`);
         const data = response.data;
         setParentIssue(data.issue);
         setCategoryId(data.issue.issue.category._id);
@@ -75,7 +75,7 @@ const CreateAssignment = () => {
         deadline: selectedDeadline || new Date().toISOString().slice(0, 10),
       };
       console.log(newAssignment);
-      const response = await axios.post(`http://localhost:5000/issues/${issue._id}/assignments`, newAssignment);
+      const response = await axios.post(`/api/issues/${issue._id}/assignments`, newAssignment);
       console.log(response);
       setLoading(false);
       setSuccess("Issue updated successfully!"); // Set success message
@@ -90,14 +90,6 @@ const CreateAssignment = () => {
     }
   }
 
-  // // Handle the change of the technician and status select inputs
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setSelected((prevSelected) => ({
-  //     ...prevSelected,
-  //     [name]: value,
-  //   }));
-  // };
   
   return (
     <Container>

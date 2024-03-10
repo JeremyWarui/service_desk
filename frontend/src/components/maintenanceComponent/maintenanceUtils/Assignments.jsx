@@ -25,7 +25,7 @@ function Assignments() {
 
   const fetchTechnicians = async () => {
     try {
-      const response = axios.get("http://localhost:5000/users");
+      const response = axios.get("/api/users");
       response
         .then((response) => {
           const technicians = response.data.users.filter(
@@ -41,7 +41,7 @@ function Assignments() {
 
   const fetchCategories = async () => {
     try {
-      const response = axios.get("http://localhost:5000/categories");
+      const response = axios.get("/api/categories");
       response
         .then((response) => {
           const categories = response.data.categories;
@@ -56,7 +56,7 @@ function Assignments() {
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/assignments");
+        const response = await axios.get("/api/assignments");
         const allAssignments = response.data.assignments;
         const filteredAssignments = allAssignments
           .filter(
