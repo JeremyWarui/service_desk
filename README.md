@@ -118,5 +118,6 @@ ResolveRocket is an open-source project that welcomes contributions from other d
 
 I appreciate alot the ALX community and Cohort 11 for the encouragement and support and opportunity to \learn and build skills that have led me to build such an application. We can do hard things
 
-Authors and Contributors
+## Authors and Contributors
+
 ResolveRocket is developed and maintained by Jeremy Warui. You can contact him at <jmwangi0x01@gmail.com>.
