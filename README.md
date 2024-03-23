@@ -1,8 +1,9 @@
-# Service Desk
+# ResolveRocket
 
+![Sign Up Page](./LoginPage.jpeg)
 ---
 
-Service Desk is a web application that serves as a maintenance issues tracking system.<br> It allows users to report issues, view their status and progress, and receive updates from the maintenance team. <br>It also enables the maintenance officer to assign issues to<br>technicians, monitor their resolution, and close them when they are done.<br>It also provides dashboards for each role to access and manage their tasks and data.
+ResolveRocket is a web application that serves as a maintenance issues tracking system.<br> It allows users to report issues, view their status and progress, and receive updates from the maintenance team. <br>It also enables the maintenance officer to assign issues to<br>technicians, monitor their resolution, and close them when they are done.<br>It also provides dashboards for each role to access and manage their tasks and data.
 
 ## Installation and Usage
 
@@ -26,8 +27,9 @@ Next, you need to create a `.env` file in the backend directory and add the foll
 
 ```bash
 PORT=5000 # the port number for the backend server
-DB_URL=mongodb://localhost:27017/service_desk # the connection string for the MongoDB database
-JWT_SECRET=your_secret_key # the secret key for generating JSON Web Tokens
+DATABASE_URI=mongodb://localhost:27017/service_desk # the connection string for the MongoDB database
+TOKEN_SECRET=your_secret_key # the secret key for generating JSON Web Tokens
+TOKEN_EXPIRE=NO_SECONDS
 ```
 
 Finally, you can start the backend and the frontend servers by running the following commands in separate terminals:
@@ -48,7 +50,7 @@ npm start
 
 The backend server will run on `http://localhost:5000` and the frontend server will run on `http://localhost:3000`.
 
-To use Service Desk, you can register as a user, a maintenance officer, or a technician, and log in with your credentials. Depending on your role, you will be able to access different dashboards and features:
+To use ResolveRocket, you can register as a user, a maintenance officer, or a technician, and log in with your credentials. Depending on your role, you will be able to access different dashboards and features:
 
 **Users dashboard**:
 
@@ -87,7 +89,7 @@ Pages:
 
 ## Technologies and Tools
 
-Service Desk is built using the following technologies and tools:
+ResolveRocket is built using the following technologies and tools:
 
 **Backend**: Node.js, Express, MongoDB, Mongoose, JWT, bcrypt, dotenv, cors, nodemon
 
@@ -95,7 +97,7 @@ Service Desk is built using the following technologies and tools:
 
 ## Contribution and License
 
-Service Desk is an open-source project that welcomes contributions from other developers. \If you want to contribute to Service Desk, please follow these steps:
+Service Desk is an open-source project that welcomes contributions from other developers. \If you want to contribute to ResolveRocket please follow these steps:
 
 - Fork the repository on GitHub
 - Create a new branch from the main branch
@@ -106,8 +108,10 @@ Service Desk is an open-source project that welcomes contributions from other de
 
 ## More work to be done
 
-1. Fully implement React role authentication for frontend
-2. Deployment of the application
+1. Deployment of the application
+
+2. Report generation
+
 3. Documentation for the API resources
 
 ## Acknowledgment
