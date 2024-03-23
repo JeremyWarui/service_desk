@@ -7,7 +7,7 @@ ResolveRocket is a web application that serves as a maintenance issues tracking 
 
 ## Installation and Usage
 
-To install and run Service Desk, you need to have Node.js, React and MongoDB installed on your machine. \You also need to clone the repository from GitHub:
+To install and run ResolveRocket, you need to have Node.js, React and MongoDB installed on your machine. \You also need to clone the repository from GitHub:
 
 ```bash
 git clone `https://github.com/JeremyWarui/service_desk.git`
@@ -97,7 +97,7 @@ ResolveRocket is built using the following technologies and tools:
 
 ## Contribution and License
 
-Service Desk is an open-source project that welcomes contributions from other developers. \If you want to contribute to ResolveRocket please follow these steps:
+ResolveRocket is an open-source project that welcomes contributions from other developers. \If you want to contribute to ResolveRocket please follow these steps:
 
 - Fork the repository on GitHub
 - Create a new branch from the main branch
@@ -119,4 +119,4 @@ Service Desk is an open-source project that welcomes contributions from other de
 I appreciate alot the ALX community and Cohort 11 for the encouragement and support and opportunity to \learn and build skills that have led me to build such an application. We can do hard things
 
 Authors and Contributors
-Service Desk is developed and maintained by Jeremy Warui. You can contact him at <jmwangi0x01@gmail.com>.
+ResolveRocket is developed and maintained by Jeremy Warui. You can contact him at <jmwangi0x01@gmail.com>.
